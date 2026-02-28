@@ -6,6 +6,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
     "@herald/shared": "workspace:*",
     "hono": "^4.12.3",
     "js-yaml": "^4.1.1",
