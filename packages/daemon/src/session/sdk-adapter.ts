@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { ClaudeCode } from 'claude-code-js';
 
 export interface SendMessageParams {
   systemPrompt: string;
@@ -16,33 +16,40 @@ export interface SdkAdapter {
   sendMessage(params: SendMessageParams): Promise<SendMessageResult>;
 }
 
-export class AnthropicAdapter implements SdkAdapter {
-  private client: Anthropic;
+export class ClaudeCodeAdapter implements SdkAdapter {
+  private claude: ClaudeCode;
 
-  constructor(apiKey: string) {
-    this.client = new Anthropic({ apiKey });
+  constructor() {
+    this.claude = new ClaudeCode();
   }
 
   async sendMessage(params: SendMessageParams): Promise<SendMessageResult> {
-    const response = await this.client.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
-      max_tokens: params.maxTokens ?? 4096,
-      system: params.systemPrompt,
-      messages: params.messages,
+    // Extract the last user message from the conversation history
+    const lastUserMessage = [...params.messages].reverse().find((m) => m.role === 'user');
+
+    if (!lastUserMessage) {
+      throw new Error('No user message found in conversation history');
+    }
+
+    const response = await this.claude.chat({
+      prompt: lastUserMessage.content,
+      systemPrompt: params.systemPrompt,
     });
 
-    const textBlock = response.content.find((b) => b.type === 'text');
+    if (!response.success) {
+      throw new Error(response.error?.result ?? 'Claude Code CLI error');
+    }
 
     return {
-      text: textBlock?.text ?? '',
-      inputTokens: response.usage.input_tokens,
-      outputTokens: response.usage.output_tokens,
+      text: response.message?.result ?? '',
+      inputTokens: 0,
+      outputTokens: 0,
     };
   }
 }
 
 export class NullAdapter implements SdkAdapter {
   async sendMessage(_params: SendMessageParams): Promise<SendMessageResult> {
-    throw new Error('SDK not configured — no API key provided');
+    throw new Error('SDK not configured — Claude Code CLI not found');
   }
 }

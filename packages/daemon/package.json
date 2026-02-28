@@ -6,8 +6,8 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.78.0",
     "@herald/shared": "workspace:*",
+    "claude-code-js": "^0.4.0",
     "hono": "^4.12.3",
     "js-yaml": "^4.1.1",
     "node-cron": "^4.2.1"
