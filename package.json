@@ -1,0 +1,19 @@
+{
+  "name": "herald",
+  "private": true,
+  "type": "module",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "test": "vitest run",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "dev:daemon": "bun run --filter @herald/daemon dev",
+    "dev:pwa": "bun run --filter @herald/pwa dev",
+    "dev:cli": "bun run --filter @herald/cli dev"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.4",
+    "typescript": "^5",
+    "vitest": "^4.0.18"
+  }
+}

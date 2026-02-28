@@ -1,0 +1,11 @@
+# Herald daemon configuration
+# Secrets go in .env, not here
+
+port: 3117
+data_dir: ./data
+agents_dir: ./agents
+personas_dir: ./personas
+memory_dir: ./memory
+reports_dir: ./reports
+newspaper_dir: ./newspaper
+log_level: info

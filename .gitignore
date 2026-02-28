@@ -1,0 +1,57 @@
+# dependencies
+node_modules
+
+# output
+out
+dist
+build
+*.tgz
+
+# code coverage
+coverage
+*.lcov
+
+# logs
+logs
+*.log
+
+# dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# caches
+.eslintcache
+.cache
+*.tsbuildinfo
+
+# IDE
+.idea
+.DS_Store
+
+# Herald-specific: ignore contents but keep directory structure via .gitkeep
+data/*
+!data/.gitkeep
+!data/migrations/
+data/migrations/*
+!data/migrations/.gitkeep
+
+memory/*
+!memory/.gitkeep
+!memory/agents/
+memory/agents/*
+!memory/agents/.gitkeep
+!memory/shared/
+memory/shared/*
+!memory/shared/.gitkeep
+!memory/conversations/
+memory/conversations/*
+!memory/conversations/.gitkeep
+!memory/user/
+memory/user/*
+!memory/user/.gitkeep
+
+reports/*
+!reports/.gitkeep
