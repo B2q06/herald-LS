@@ -8,9 +8,11 @@
   "dependencies": {
     "@herald/shared": "workspace:*",
     "hono": "^4.12.3",
+    "js-yaml": "^4.1.1",
     "node-cron": "^4.2.1"
   },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
     "@types/node-cron": "^3.0.11"
   }
 }
