@@ -12,6 +12,7 @@ export function createAgentRoutes(registry: AgentRegistry) {
       status: agent.status,
       registeredAt: agent.registeredAt,
       ...(agent.lastError ? { lastError: agent.lastError } : {}),
+      ...(agent.lastRun ? { lastRun: agent.lastRun } : {}),
     }));
 
     return c.json({ agents });
@@ -31,6 +32,7 @@ export function createAgentRoutes(registry: AgentRegistry) {
       status: agent.status,
       registeredAt: agent.registeredAt,
       ...(agent.lastError ? { lastError: agent.lastError } : {}),
+      ...(agent.lastRun ? { lastRun: agent.lastRun } : {}),
     });
   });
 

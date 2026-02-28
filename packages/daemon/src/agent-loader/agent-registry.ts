@@ -1,10 +1,18 @@
 import type { AgentConfig } from '@herald/shared';
 
+export interface LastRunInfo {
+  runId: string;
+  status: string;
+  startedAt: string;
+  finishedAt: string;
+}
+
 export interface RegisteredAgent {
   config: AgentConfig;
   registeredAt: string;
   status: 'active' | 'error';
   lastError?: string;
+  lastRun?: LastRunInfo;
 }
 
 export class AgentRegistry {
@@ -43,6 +51,15 @@ export class AgentRegistry {
 
   has(name: string): boolean {
     return this.agents.has(name);
+  }
+
+  updateLastRun(name: string, runInfo: LastRunInfo): boolean {
+    const existing = this.agents.get(name);
+    if (!existing) {
+      return false;
+    }
+    existing.lastRun = runInfo;
+    return true;
   }
 
   get size(): number {

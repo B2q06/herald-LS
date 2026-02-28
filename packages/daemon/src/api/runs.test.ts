@@ -1,5 +1,8 @@
+import { mkdir, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import type { AgentConfig, HeraldConfig } from '@herald/shared';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AgentRegistry } from '../agent-loader/agent-registry.ts';
 import type { SdkAdapter, SendMessageParams, SendMessageResult } from '../session/sdk-adapter.ts';
 import { SessionManager } from '../session/session-manager.ts';
@@ -21,6 +24,8 @@ describe('run routes', () => {
   let registry: AgentRegistry;
   let sessionManager: SessionManager;
   let mockAdapter: MockSdkAdapter;
+  let tempDir: string;
+  let heraldConfig: HeraldConfig;
 
   const makeConfig = (name: string): AgentConfig => ({
     name,
@@ -31,21 +36,38 @@ describe('run routes', () => {
     team_eligible: false,
   });
 
-  const heraldConfig: HeraldConfig = {
-    port: 3117,
-    data_dir: '/tmp/herald-test/data',
-    agents_dir: '/tmp/herald-test/agents',
-    personas_dir: '/tmp/herald-test/personas',
-    memory_dir: '/tmp/herald-test/memory',
-    reports_dir: '/tmp/herald-test/reports',
-    newspaper_dir: '/tmp/herald-test/newspaper',
-    log_level: 'info',
-  };
+  beforeEach(async () => {
+    tempDir = join(tmpdir(), `herald-runs-test-${Date.now()}`);
+    const personasDir = join(tempDir, 'personas');
+    const memoryDir = join(tempDir, 'memory');
 
-  beforeEach(() => {
+    await mkdir(personasDir, { recursive: true });
+    await mkdir(join(memoryDir, 'agents', 'test-agent'), { recursive: true });
+    await Bun.write(join(personasDir, 'test-agent.md'), '# Test Persona');
+    await Bun.write(join(memoryDir, 'agents', 'test-agent', 'knowledge.md'), '');
+    await Bun.write(join(memoryDir, 'agents', 'test-agent', 'last-jobs.md'), '');
+
+    heraldConfig = {
+      port: 3117,
+      data_dir: join(tempDir, 'data'),
+      agents_dir: join(tempDir, 'agents'),
+      personas_dir: personasDir,
+      memory_dir: memoryDir,
+      reports_dir: join(tempDir, 'reports'),
+      newspaper_dir: join(tempDir, 'newspaper'),
+      log_level: 'info',
+    };
+
     registry = new AgentRegistry();
     mockAdapter = new MockSdkAdapter();
     sessionManager = new SessionManager(mockAdapter);
+
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(async () => {
+    vi.restoreAllMocks();
+    await rm(tempDir, { recursive: true, force: true });
   });
 
   describe('POST /api/agents/:name/run', () => {
@@ -89,7 +111,7 @@ describe('run routes', () => {
       expect(body.error).toBe('SDK not configured');
     });
 
-    it('runs agent and returns result', async () => {
+    it('runs agent and returns structured result', async () => {
       registry.register('test-agent', makeConfig('test-agent'));
 
       const app = createApp({
@@ -108,8 +130,10 @@ describe('run routes', () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body.result).toBe('Mock agent response');
-      expect(body.status).toBeDefined();
-      expect(typeof body.interactionCount).toBe('number');
+      expect(body.runId).toBeDefined();
+      expect(body.status).toBe('success');
+      expect(body.startedAt).toBeDefined();
+      expect(body.finishedAt).toBeDefined();
     });
 
     it('works without prompt in body', async () => {
@@ -131,6 +155,66 @@ describe('run routes', () => {
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(body.result).toBeDefined();
+      expect(body.runId).toBeDefined();
+    });
+  });
+
+  describe('GET /api/agents/:name/runs', () => {
+    it('returns 404 when agent not found', async () => {
+      const app = createApp({
+        registry,
+        sessionManager,
+        heraldConfig,
+        sdkConfigured: true,
+      });
+
+      const res = await app.request('/api/agents/nonexistent/runs');
+      expect(res.status).toBe(404);
+      const body = await res.json();
+      expect(body.error).toBe('Agent not found');
+    });
+
+    it('returns empty list when no runs exist', async () => {
+      registry.register('test-agent', makeConfig('test-agent'));
+
+      const app = createApp({
+        registry,
+        sessionManager,
+        heraldConfig,
+        sdkConfigured: true,
+      });
+
+      const res = await app.request('/api/agents/test-agent/runs');
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.runs).toEqual([]);
+    });
+
+    it('returns runs after executing an agent', async () => {
+      registry.register('test-agent', makeConfig('test-agent'));
+
+      const app = createApp({
+        registry,
+        sessionManager,
+        heraldConfig,
+        sdkConfigured: true,
+      });
+
+      // Run the agent first
+      await app.request('/api/agents/test-agent/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: 'Do your thing' }),
+      });
+
+      const res = await app.request('/api/agents/test-agent/runs');
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.runs).toHaveLength(1);
+      expect(body.runs[0].runId).toBeDefined();
+      expect(body.runs[0].status).toBe('success');
+      expect(body.runs[0].startedAt).toBeDefined();
+      expect(body.runs[0].finishedAt).toBeDefined();
     });
   });
 

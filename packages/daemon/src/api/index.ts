@@ -1,3 +1,4 @@
+import type { HeraldConfig } from '@herald/shared';
 import { Hono } from 'hono';
 import type { AgentRegistry } from '../agent-loader/agent-registry.ts';
 import type { SessionManager } from '../session/session-manager.ts';
@@ -8,7 +9,7 @@ import { systemRoutes } from './system.ts';
 export interface AppDeps {
   registry?: AgentRegistry;
   sessionManager?: SessionManager;
-  heraldConfig?: { memory_dir: string; personas_dir: string } & Record<string, unknown>;
+  heraldConfig?: HeraldConfig;
   sdkConfigured?: boolean;
 }
 
