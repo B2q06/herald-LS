@@ -1,7 +1,9 @@
 import { Hono } from 'hono';
+import type { AgentRegistry } from '../agent-loader/agent-registry.ts';
+import { createAgentRoutes } from './agents.ts';
 import { systemRoutes } from './system.ts';
 
-export function createApp() {
+export function createApp(registry?: AgentRegistry) {
   const app = new Hono();
 
   app.onError((_err, c) => {
@@ -10,6 +12,10 @@ export function createApp() {
   });
 
   app.route('/', systemRoutes);
+
+  if (registry) {
+    app.route('/', createAgentRoutes(registry));
+  }
 
   return app;
 }
