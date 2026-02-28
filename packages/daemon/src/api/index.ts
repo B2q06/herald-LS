@@ -1,9 +1,11 @@
 import type { HeraldConfig } from '@herald/shared';
 import { Hono } from 'hono';
 import type { AgentRegistry } from '../agent-loader/agent-registry.ts';
+import type { ScheduleRegistry } from '../scheduler/schedule-registry.ts';
 import type { SessionManager } from '../session/session-manager.ts';
 import { createAgentRoutes } from './agents.ts';
 import { createRunRoutes } from './runs.ts';
+import { createScheduleRoutes } from './schedule.ts';
 import { systemRoutes } from './system.ts';
 
 export interface AppDeps {
@@ -11,6 +13,7 @@ export interface AppDeps {
   sessionManager?: SessionManager;
   heraldConfig?: HeraldConfig;
   sdkConfigured?: boolean;
+  scheduleRegistry?: ScheduleRegistry;
 }
 
 export function createApp(registryOrDeps?: AgentRegistry | AppDeps) {
@@ -28,6 +31,7 @@ export function createApp(registryOrDeps?: AgentRegistry | AppDeps) {
   let sessionManager: SessionManager | undefined;
   let heraldConfig: AppDeps['heraldConfig'];
   let sdkConfigured = false;
+  let scheduleRegistry: ScheduleRegistry | undefined;
 
   if (registryOrDeps && 'has' in registryOrDeps) {
     // Old-style: just a registry
@@ -38,6 +42,7 @@ export function createApp(registryOrDeps?: AgentRegistry | AppDeps) {
     sessionManager = registryOrDeps.sessionManager;
     heraldConfig = registryOrDeps.heraldConfig;
     sdkConfigured = registryOrDeps.sdkConfigured ?? false;
+    scheduleRegistry = registryOrDeps.scheduleRegistry;
   }
 
   if (registry) {
@@ -54,6 +59,10 @@ export function createApp(registryOrDeps?: AgentRegistry | AppDeps) {
         sdkConfigured,
       }),
     );
+  }
+
+  if (scheduleRegistry) {
+    app.route('/', createScheduleRoutes(scheduleRegistry));
   }
 
   return app;

@@ -1,5 +1,6 @@
 import type { FSWatcher } from 'node:fs';
 import type { HeraldConfig } from '@herald/shared';
+import type { ScheduleContext } from '../watcher/agent-discovery.ts';
 import { initialScan, watchAgentsDir } from '../watcher/agent-discovery.ts';
 import { AgentRegistry } from './agent-registry.ts';
 
@@ -12,7 +13,10 @@ export interface AgentLoaderResult {
   watcher: FSWatcher;
 }
 
-export async function initAgentLoader(config: HeraldConfig): Promise<AgentLoaderResult> {
+export async function initAgentLoader(
+  config: HeraldConfig,
+  scheduleContext?: ScheduleContext,
+): Promise<AgentLoaderResult> {
   const registry = new AgentRegistry();
 
   const discoveryOptions = {
@@ -22,6 +26,7 @@ export async function initAgentLoader(config: HeraldConfig): Promise<AgentLoader
       memoryDir: config.memory_dir,
       reportsDir: config.reports_dir,
     },
+    scheduleContext,
   };
 
   await initialScan(discoveryOptions);
