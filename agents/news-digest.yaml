@@ -1,0 +1,13 @@
+name: news-digest
+persona: news-digest.md
+schedule: "30 5,11,17,23 * * *"
+output_dir: reports/news-digest
+session_limit: 15
+notify_policy: failures
+team_eligible: true
+discovery_mode: aggressive
+memory_paths:
+  knowledge: memory/agents/news-digest/knowledge.md
+  preferences: memory/agents/news-digest/preferences.md
+  last_jobs: memory/agents/news-digest/last-jobs.md
+  rag: memory/agents/news-digest/rag

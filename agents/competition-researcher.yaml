@@ -1,0 +1,13 @@
+name: competition-researcher
+persona: competition-researcher.md
+schedule: "30 5,11,17,23 * * *"
+output_dir: reports/competition-researcher
+session_limit: 15
+notify_policy: failures
+team_eligible: true
+discovery_mode: aggressive
+memory_paths:
+  knowledge: memory/agents/competition-researcher/knowledge.md
+  preferences: memory/agents/competition-researcher/preferences.md
+  last_jobs: memory/agents/competition-researcher/last-jobs.md
+  rag: memory/agents/competition-researcher/rag

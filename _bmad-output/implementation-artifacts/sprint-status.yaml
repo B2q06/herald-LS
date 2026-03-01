@@ -37,6 +37,10 @@
 #     Epic 3 (db, embedding, librarian, memory), Epic 4 (all 4 stories)
 #   - Uses Claude Code SDK (@anthropic-ai/claude-agent-sdk)
 #   - Test state: 43 suites, 462 tests — ALL passing
+#   - Research agent roster: 6 agents (3 original + 3 new)
+#     Original: ml-researcher, compute-researcher, ai-tooling-researcher
+#     New: competition-researcher, geopolitical-monitor, news-digest
+#   - All 6 agents have YAML configs, persona files, and seeded knowledge bases
 #
 # story/1.2 through story/1.6 (individual feature branches)
 #   - All properly committed and merged
@@ -63,6 +67,10 @@ development_status:
 
   # Epic 2: Automated Research Patrols
   # Branch: consolidate/epic-4-complete
+  # Full 6-agent roster: ml-researcher, compute-researcher, ai-tooling-researcher,
+  #   competition-researcher (compute commoditization focus), geopolitical-monitor,
+  #   news-digest (serendipity engine)
+  # All agents have: YAML config, persona markdown, seeded knowledge.md
   epic-2: done
   2-1-research-agent-persona-patrol-workflow: done
   2-2-opinion-prediction-framework: done
