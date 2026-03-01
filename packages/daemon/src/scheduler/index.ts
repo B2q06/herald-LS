@@ -1,6 +1,6 @@
 import type { HeraldConfig } from '@herald/shared';
 import type { AgentRegistry } from '../agent-loader/agent-registry.ts';
-import { executeRun } from '../session/run-executor.ts';
+import { executeRun, type PostRunContext } from '../session/run-executor.ts';
 import type { SessionManager } from '../session/session-manager.ts';
 import { ScheduleRegistry } from './schedule-registry.ts';
 
@@ -10,7 +10,8 @@ export function initScheduler(
   agentRegistry: AgentRegistry,
   sessionManager: SessionManager,
   heraldConfig: HeraldConfig,
-): ScheduleRegistry {
+  postRunContext?: PostRunContext,
+): { scheduleRegistry: ScheduleRegistry } {
   const scheduleRegistry = new ScheduleRegistry();
 
   for (const [name, agent] of agentRegistry.getAll()) {
@@ -32,7 +33,7 @@ export function initScheduler(
       // Standard patrol agent
       scheduleRegistry.register(name, agent.config.schedule, () => {
         console.log(`[herald] Scheduled run: ${name} (cron: ${agent.config.schedule})`);
-        executeRun(name, agent.config, heraldConfig, sessionManager).catch((err) => {
+        executeRun(name, agent.config, heraldConfig, sessionManager, undefined, undefined, postRunContext).catch((err) => {
           console.error(`[herald] Scheduled run failed for ${name}:`, err);
         });
       });
@@ -56,5 +57,5 @@ export function initScheduler(
       });
   });
 
-  return scheduleRegistry;
+  return { scheduleRegistry };
 }
