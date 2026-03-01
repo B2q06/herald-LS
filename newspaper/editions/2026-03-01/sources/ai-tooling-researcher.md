@@ -7,23 +7,6 @@ status: success
 discovery_mode: aggressive
 ---
 
-Knowledge base updated. Now delivering the full patrol report:
-
----
-
-```
----
-agent: ai-tooling-researcher
-run_id: patrol-2026-03-01-b
-started_at: 2026-03-01T00:05:00Z
-finished_at: 2026-03-01T00:52:00Z
-status: success
-patrol_sources_hit: 22
-findings_evaluated: 18
-discovery_mode: aggressive
----
-```
-
 # AI Tooling Patrol — 2026-03-01 (Run 2)
 
 ## Headlines

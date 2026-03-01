@@ -37,6 +37,7 @@ export function formatRelativeTime(date: string | Date): string {
 
   const diffSecs = Math.floor(diffMs / 1000);
 
+  if (diffSecs < 0) return 'in the future';
   if (diffSecs < 30) return 'just now';
   if (diffSecs < 60) return `${diffSecs}s ago`;
 

@@ -7,22 +7,6 @@ status: success
 discovery_mode: aggressive
 ---
 
-Knowledge base updated. Now let me write the full patrol report.
-
----
-
-```markdown
----
-agent: news-digest
-run_id: nd-20260301-001
-started_at: 2026-03-01T00:00:00Z
-finished_at: 2026-03-01T00:45:00Z
-status: success
-patrol_sources_hit: 18
-findings_evaluated: 47
-discovery_mode: aggressive
----
-
 # News Digest — 2026-03-01
 
 ## The Lead
@@ -228,4 +212,3 @@ For B: the bunup number is striking. 37ms build cycles fundamentally change the 
 - **"H100 spot prices will fall below $1.50/hr on secondary markets by Q4 2026."** — Confidence: 60, Timeframe: Q4 2026. New prediction this patrol.
 
 - **"wgpu/WebGPU will achieve viability for inference on non-NVIDIA hardware within 18 months, increasing compute fungibility pressure."** — Confidence: 50, Timeframe: Q3 2027. New prediction this patrol.
-```

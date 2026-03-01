@@ -7,22 +7,6 @@ status: success
 discovery_mode: aggressive
 ---
 
-Knowledge base updated. Now generating the patrol report.
-
----
-
-```markdown
----
-agent: compute-researcher
-run_id: cmp-20260301-patrol02
-started_at: 2026-03-01T11:00 UTC
-finished_at: 2026-03-01T12:15 UTC
-status: success
-patrol_sources_hit: 18
-findings_evaluated: 31
-discovery_mode: aggressive
----
-
 # Compute Research Patrol — 2026-03-01
 
 ## Market Pulse
@@ -223,43 +207,3 @@ When the S-1 drops, scrutinize: (1) revenue concentration past G42 removal — i
 | PRED-005: Consumer GPU elevated through mid-2026 | 80% | 90% | ↑ Memory contracts, 30yr first, 11% gaming rev |
 | PRED-006: Power delays major DC by EOY 2026 | 65% | 75% | ↑ Constraint empirically underway |
 | PRED-007: N1X laptop ships Q2 2026 | NEW | 65% | New prediction |
-```
-
----
-
-**Patrol complete.** 18 sources hit, 31 findings evaluated, knowledge base fully updated. The dominant story this cycle is the structural lock-in of NVIDIA's position — $68.1B quarters, the CoreWeave capacity guarantee, and the Rubin ramp all point the same direction. The contrarian position worth watching: AMD at 40% Meta share + ROCm crossing viability threshold is moving faster than the market appreciates.
-
-**GTC 2026 (March 16) is the next market-moving event.** Feynman preview confidence is now 82%. Schedule the next patrol for immediately after the keynote.
-
-Sources:
-- [NVIDIA Newsroom — Rubin Platform](https://nvidianews.nvidia.com/news/rubin-platform-ai-supercomputer)
-- [NVIDIA Q4 FY2026 Earnings](https://nvidianews.nvidia.com/news/nvidia-announces-financial-results-for-fourth-quarter-and-fiscal-2026)
-- [Fortune — NVIDIA $68B Q4](https://fortune.com/2026/02/25/nvidia-nvda-earnings-q4-results-jensen-huang/)
-- [Tom's Hardware — NVIDIA $215B Annual Revenue](https://www.tomshardware.com/pc-components/gpus/nvidia-posts-record-usd215-billion-annual-revenue-in-latest-quarterly-earnings-report-gaming-gpus-now-only-11-45-percent-of-revenue)
-- [TrendForce — No New Gaming GPU 2026](https://www.trendforce.com/news/2026/02/06/news-nvidia-reportedly-plans-no-new-gaming-gpu-in-2026-amid-memory-tightness-first-time-in-30-years/)
-- [TechSpot — GPU Pricing Q1 2026](https://www.techspot.com/article/3088-gpu-pricing-q1-2026/)
-- [AMD Newsroom — AMD+Meta 6GW Deal](https://www.amd.com/en/newsroom/press-releases/2026-2-24-amd-and-meta-announce-expanded-strategic-partnersh.html)
-- [CNBC — AMD+Meta Deal](https://www.cnbc.com/2026/02/24/meta-to-use-6gw-of-amd-gpus-days-after-expanded-nvidia-ai-chip-deal.html)
-- [DatacenterKnowledge — AMD+Meta $100B Deal](https://www.datacenterknowledge.com/data-center-chips/amd-meta-strike-100b-6gw-chip-deal-as-ai-race-heats-up)
-- [TrendForce — Feynman on TSMC A16 / GTC 2026](https://www.trendforce.com/news/2026/02/25/news-nvidia-gtc-2026-in-focus-feynman-reportedly-on-tsmc-a16-samsung-sk-hynix-to-showcase-hbm4/)
-- [Digitimes — GTC 2026 Mystery Chip](https://www.digitimes.com/news/a20260226PD203/nvidia-gtc-siph-electricity-2026.html)
-- [WCCFTech — Feynman 1.6nm at GTC](https://wccftech.com/we-could-see-the-first-1-6nm-chips-debut-at-nvidia-gtc-2026/)
-- [abit.ee — Feynman + Groq LPU](https://abit.ee/en/graphics-cards/nvidia-feynman-16nm-gtc-2026-ai-accelerators-groq-news-en)
-- [VideoCardz — GTC 2026 Keynote](https://videocardz.com/newz/nvidia-gtc-2026-keynote-is-now-scheduled-for-march-16)
-- [TechCrunch — NVIDIA CoreWeave $2B](https://techcrunch.com/2026/01/26/nvidia-invests-2b-to-help-debt-ridden-coreweave-add-5gw-of-ai-compute/)
-- [Next Platform — CoreWeave Circular Financing](https://www.nextplatform.com/ai/2026/01/27/nvidias-2-billion-investment-in-coreweave-is-a-drop-in-a-250-billion-bucket/4092118)
-- [IndexBox — Cerebras $23B Valuation](https://www.indexbox.io/blog/cerebras-systems-secures-1-billion-at-23-billion-valuation-ahead-of-2026-ipo/)
-- [Seeking Alpha — Cerebras IPO](https://seekingalpha.com/article/4867744-cerebras-nvidia-rival-gearing-up-for-ipo)
-- [EE Times — Tenstorrent Layoffs](https://www.eetimes.com/layoffs-at-tenstorrent-as-startup-pivots-towards-developer-sales/)
-- [EE Times — Tenstorrent $693M Series D](https://www.eetimes.com/tenstorrent-raises-693-million-series-d/)
-- [The Register — NVIDIA N1X SoC](https://www.theregister.com/2026/02/23/nvidia_soc_pc/)
-- [Tom's Hardware — NVIDIA N1X Laptops](https://www.tomshardware.com/pc-components/cpus/nvidias-arm-based-n1x-equipped-gaming-laptops-are-reportedly-set-to-debut-this-quarter-with-n2-series-chips-planned-for-2027-new-roadmap-leak-finally-hints-at-consumer-release-windows-on-arm-machines)
-- [enkiai.com — AI Power Crisis / Nuclear](https://enkiai.com/data-center/ai-power-crisis-2026-metas-nuclear-deal-ignites-race)
-- [DatacenterKnowledge — Nuclear for AI](https://www.datacenterknowledge.com/energy-power-supply/how-realistic-is-nuclear-power-for-ai-data-centers)
-- [IntuitionLabs — H100 Cloud Pricing 2026](https://intuitionlabs.ai/articles/h100-rental-prices-cloud-comparison)
-- [ThunderCompute — H200 Pricing](https://www.thundercompute.com/blog/nvidia-h200-pricing)
-- [ThunderCompute — MI300X Pricing](https://www.thundercompute.com/blog/amd-mi300x-pricing)
-- [RunPod Pricing](https://www.runpod.io/pricing)
-- [Vast.ai Pricing](https://vast.ai/pricing)
-- [Groq Pricing](https://groq.com/pricing)
-- [Medium — Vast.ai vs RunPod 2026](https://medium.com/@velinxs/vast-ai-vs-runpod-pricing-in-2026-which-gpu-cloud-is-cheaper-bd4104aa591b)

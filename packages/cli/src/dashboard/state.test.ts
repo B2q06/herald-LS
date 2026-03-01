@@ -523,7 +523,7 @@ describe('pruneOldChanges', () => {
     expect(result[0].agentName).toBe('recent');
   });
 
-  it('keeps changes exactly at 60 seconds (exclusive threshold)', () => {
+  it('prunes changes exactly at 60 seconds (exclusive threshold)', () => {
     const now = new Date('2026-03-01T12:01:00Z');
     const changes: RecentChange[] = [
       { type: 'agent-completed', agentName: 'edge', timestamp: new Date('2026-03-01T12:00:00Z') }, // exactly 60s

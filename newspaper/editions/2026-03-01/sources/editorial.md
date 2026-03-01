@@ -1,7 +1,3 @@
-Both files are written. Here is the complete newspaper:
-
----
-
 # Herald Daily Brief — 2026-03-01
 
 ## Top Stories

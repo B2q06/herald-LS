@@ -35,7 +35,7 @@ describe('agents command', () => {
     vi.mocked(get).mockResolvedValue({
       agents: [
         { name: 'scout', status: 'idle', config: { schedule: '0 */6 * * *' } },
-        { name: 'analyst', status: 'running', lastRun: new Date().toISOString() },
+        { name: 'analyst', status: 'running', lastRun: { runId: 'run-001', status: 'running', startedAt: new Date().toISOString() } },
       ],
     });
 

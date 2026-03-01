@@ -7,22 +7,6 @@ status: success
 discovery_mode: aggressive
 ---
 
-Knowledge base updated. Now generating the patrol report.
-
----
-
-```markdown
----
-agent: competition-researcher
-run_id: patrol-001-20260301
-started_at: 2026-03-01T00:00:00Z
-finished_at: 2026-03-01T01:15:00Z
-status: success
-patrol_sources_hit: 18
-findings_evaluated: 31
-discovery_mode: aggressive
----
-
 # Competition Research Patrol — 2026-03-01
 
 ## Headlines
@@ -233,53 +217,3 @@ The B200 Index is also significant strategically: by being first to benchmark B2
 - **Updated: "First $1B+ notional compute derivatives trade within 18 months."** — Confidence raised to 50 (from 40). First swap now confirmed executed; AX compute perpetuals pending; ABS lender hedging demand is real and growing.
 
 - **Updated: "At least one major bank will announce a compute derivatives desk within 12 months."** — Confidence raised to 55 (from 50). GPU ABS with BlackRock/PIMCO/Macquarie already embedded. SiliconIndex on Bloomberg + Refinitiv. Deltix integration at AX Exchange. The rails are laid.
-```
-
----
-
-**Knowledge base updated.** Here's a summary of what this first patrol found and what changed:
-
-## Patrol Summary
-
-**18 sources hit | 31 findings evaluated | 9 items in final report**
-
-### 🔴 Highest-Priority New Intelligence
-
-1. **OneChronos + Auctionomics** — A Nobel-laureate-backed ($80M+) compute market entrant using combinatorial auction theory, announced July 2025. Completely absent from the initial knowledge base. This is the most intellectually serious approach in the space and the most well-capitalized new entrant.
-
-2. **Ornn's first swap is live** — Bavaria confirmed to The Block that the first OTC compute swap has been executed. The market crossed from "announced" to "real."
-
-3. **Silicon Data is now on Bloomberg AND Refinitiv** — via a dxFeed partnership. Only compute data provider on both major institutional terminals. Distribution moat is hardening faster than expected.
-
-4. **Remote Access Security Act** — House passed 369-22 in January 2026. Extends export controls to cloud GPU access. Creates compliance layer for all compute marketplaces — incumbents with KYC infrastructure win.
-
-5. **GPU ABS is $11B+ and growing** — Institutional finance is already embedded in compute markets through the collateral/lending channel. This is the organic demand pull for derivatives that Ornn's origin story predicted.
-
-### 🟡 Key Updated Opinions & Predictions
-
-- Index war confidence: 60 → 65 (now in real transactions)
-- Silicon Data / Compute Exchange merger confidence: 75 → 78
-- First $1B+ derivatives trade: 40 → 50 (first swap confirmed live)
-- Bank compute derivatives desk: 50 → 55 (GPU ABS lenders + terminal access)
-- **3 new opinions formed, 2 new predictions added**
-
-Sources:
-- [Carmen Li - LinkedIn](https://www.linkedin.com/in/carmenrli/)
-- [Silicon Data CEO Carmen Li Expands Leadership to Include Compute Exchange](https://www.einpresswire.com/article/855693648/silicon-data-ceo-carmen-li-expands-leadership-to-include-compute-exchange)
-- [Ornn Raises $5.7 Million Seed Round](https://www.prnewswire.com/news-releases/ornn-raises-5-7-million-seed-round-to-launch-the-worlds-first-compute-futures-exchange-302596938.html)
-- [Architect Financial Technologies Partners with Ornn](https://www.prnewswire.com/news-releases/architect-financial-technologies-partners-with-compute-index-provider-ornn-to-launch-exchange-traded-futures-on-gpu-and-ram-prices-302666613.html)
-- [Former FTX US president Brett Harrison's Architect expands into AI compute markets | The Block](https://www.theblock.co/post/386487/former-ftx-us-president-brett-harrisons-architect-expands-crypto-style-perpetual-futures-into-ai-compute-markets)
-- [Auctionomics and OneChronos Partner on First Tradable Financial Market for GPU Compute](https://www.businesswire.com/news/home/20250729678918/en/Auctionomics-and-OneChronos-Partner-on-First-Tradable-Financial-Market-for-GPU-Compute)
-- [Startup and Nobel laureate collaborate to create GPU financial exchange | TechSpot](https://www.techspot.com/news/108879-startup-nobel-laureate-collaborate-create-gpu-financial-exchange.html)
-- [OneChronos And Auctionomics Launch First Auction Market For GPU Compute | Upstarts Media](https://www.upstartsmedia.com/p/one-chronos-auctionomics-launch-gpu-compute-market)
-- [Silicon Data B200 Index and Refinitiv Expansion](https://www.silicondata.com/news-room/silicon-data-announces-major-revision-to-a100-h100-rental-indices-launches-first-ever-b200-index-and-introduces-new-hyperscaler-rental-benchmarks)
-- [dxFeed Helped Silicon Data Expand GPU Index Coverage on Refinitiv](https://dxfeed.com/dxfeed-helped-silicon-data-to-expand-gpu-index-coverage-on-refinitiv/)
-- [GPU Compute Derivatives: New Frontier for Institutional Risk Management | AInvest](https://www.ainvest.com/news/gpu-compute-derivatives-frontier-institutional-risk-management-ai-infrastructure-2601/)
-- [GPUs as Collateral — Chip Based ABS | Medium](https://medium.com/@Elongated_musk/gpus-as-collateral-chip-based-abs-acf55ac3f135)
-- [CoreWeave GPU Debt Wall 2026](https://markets.financialcontent.com/stocks/article/finterra-2026-2-23-the-gpu-debt-wall-a-deep-dive-into-coreweave-crwv-and-the-2026-ai-financing-crisis)
-- [H.R. 2683 - Remote Access Security Act | Congress.gov](https://www.congress.gov/bill/119th-congress/house-bill/2683)
-- [US House Passes Remote Access Security Act | Baker McKenzie](https://sanctionsnews.bakermckenzie.com/us-house-passes-remote-access-security-act/)
-- [Trump's AI Action Plan | Georgetown CSET](https://cset.georgetown.edu/article/trumps-plan-for-ai-recapping-the-white-houses-ai-action-plan/)
-- [America's AI Action Plan PDF | White House](https://www.whitehouse.gov/wp-content/uploads/2025/07/Americas-AI-Action-Plan.pdf)
-- [U.S. Patent for Predictive GPU Optimization | ProphetStor](https://prophetstor.com/2026/02/26/predictive-gpu-utilization-optimization/)
-- [The Rise of GPU Marketplaces in 2026 | Compute Exchange](https://compute.exchange/blogs/the-rise-of-gpu-marketplaces-in-2026)

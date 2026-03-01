@@ -41,11 +41,16 @@ export async function get<T = unknown>(path: string): Promise<T> {
   const baseUrl = getBaseUrl();
   const url = `${baseUrl}${path}`;
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10_000);
+
   let response: Response;
   try {
-    response = await fetch(url);
+    response = await fetch(url, { signal: controller.signal });
   } catch (err) {
     throw new DaemonUnreachableError(baseUrl, err);
+  } finally {
+    clearTimeout(timeout);
   }
 
   if (!response.ok) {
@@ -65,15 +70,21 @@ export async function post<T = unknown>(path: string, body?: unknown): Promise<T
   const baseUrl = getBaseUrl();
   const url = `${baseUrl}${path}`;
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10_000);
+
   let response: Response;
   try {
     response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
       ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
     });
   } catch (err) {
     throw new DaemonUnreachableError(baseUrl, err);
+  } finally {
+    clearTimeout(timeout);
   }
 
   if (!response.ok) {

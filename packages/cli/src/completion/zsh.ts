@@ -27,7 +27,7 @@ _herald() {
       _describe -t commands 'herald commands' commands
       ;;
     args)
-      case "\$words[1]" in
+      case "\$line[1]" in
         status)
           _arguments \\
             '--json[Output raw JSON]'

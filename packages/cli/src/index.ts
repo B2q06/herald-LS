@@ -53,4 +53,4 @@ program.action(() => {
   program.help();
 });
 
-program.parse();
+program.parseAsync();

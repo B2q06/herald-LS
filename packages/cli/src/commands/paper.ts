@@ -77,6 +77,14 @@ export function createPaperCommand(): Command {
             process.exit(1);
             return;
           }
+          // Validate calendar correctness (reject month 13, day 32, etc.)
+          const [y, m, d] = opts.date.split('-').map(Number);
+          const parsed = new Date(y, m - 1, d);
+          if (parsed.getFullYear() !== y || parsed.getMonth() !== m - 1 || parsed.getDate() !== d) {
+            console.error('Error: Invalid date format. Expected YYYY-MM-DD (e.g. 2026-03-01).');
+            process.exit(1);
+            return;
+          }
           const data = await get<EditionDetailResponse>(`/api/newspaper/editions/${opts.date}`);
 
           if (opts.json) {

@@ -23,7 +23,10 @@ describe('api-client', () => {
 
       const result = await get('/health');
 
-      expect(globalThis.fetch).toHaveBeenCalledWith('http://localhost:3117/health');
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        'http://localhost:3117/health',
+        expect.objectContaining({ signal: expect.any(AbortSignal) }),
+      );
       expect(result).toEqual(mockResponse);
     });
 
@@ -35,7 +38,10 @@ describe('api-client', () => {
 
       await get('/health');
 
-      expect(globalThis.fetch).toHaveBeenCalledWith('http://myhost:9999/health');
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        'http://myhost:9999/health',
+        expect.objectContaining({ signal: expect.any(AbortSignal) }),
+      );
     });
 
     it('strips trailing slash from HERALD_URL', async () => {
@@ -46,7 +52,10 @@ describe('api-client', () => {
 
       await get('/health');
 
-      expect(globalThis.fetch).toHaveBeenCalledWith('http://myhost:9999/health');
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        'http://myhost:9999/health',
+        expect.objectContaining({ signal: expect.any(AbortSignal) }),
+      );
     });
 
     it('throws DaemonUnreachableError when fetch fails', async () => {
@@ -88,11 +97,12 @@ describe('api-client', () => {
 
       const result = await post('/api/agents/test/run', { prompt: 'hello' });
 
-      expect(globalThis.fetch).toHaveBeenCalledWith('http://localhost:3117/api/agents/test/run', {
+      expect(globalThis.fetch).toHaveBeenCalledWith('http://localhost:3117/api/agents/test/run', expect.objectContaining({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: 'hello' }),
-      });
+        signal: expect.any(AbortSignal),
+      }));
       expect(result).toEqual(mockResult);
     });
 
@@ -103,10 +113,11 @@ describe('api-client', () => {
 
       await post('/api/agents/test/run');
 
-      expect(globalThis.fetch).toHaveBeenCalledWith('http://localhost:3117/api/agents/test/run', {
+      expect(globalThis.fetch).toHaveBeenCalledWith('http://localhost:3117/api/agents/test/run', expect.objectContaining({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-      });
+        signal: expect.any(AbortSignal),
+      }));
     });
 
     it('throws DaemonUnreachableError when fetch fails', async () => {

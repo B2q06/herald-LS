@@ -33,7 +33,11 @@ function normalizeAgent(raw: AgentRunRaw): AgentRunInfo {
   const finishedAt = raw.lastRun?.finishedAt;
   let duration: number | undefined;
   if (startedAt && finishedAt) {
-    duration = new Date(finishedAt).getTime() - new Date(startedAt).getTime();
+    const start = new Date(startedAt).getTime();
+    const end = new Date(finishedAt).getTime();
+    if (Number.isFinite(start) && Number.isFinite(end)) {
+      duration = end - start;
+    }
   }
   return {
     name: raw.name,
