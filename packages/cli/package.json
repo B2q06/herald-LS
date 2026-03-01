@@ -5,7 +5,11 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "bin": {
+    "herald": "./src/index.ts"
+  },
   "dependencies": {
-    "@herald/shared": "workspace:*"
+    "@herald/shared": "workspace:*",
+    "commander": "^13.1.0"
   }
 }
