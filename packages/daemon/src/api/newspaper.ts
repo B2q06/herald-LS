@@ -1,7 +1,13 @@
+import { readdir } from 'node:fs/promises';
+import { join } from 'node:path';
 import { BreakingEventSchema, type HeraldConfig } from '@herald/shared';
 import { Hono } from 'hono';
 import type { AgentRegistry } from '../agent-loader/agent-registry.ts';
 import type { SessionManager } from '../session/session-manager.ts';
+
+function isValidDate(date: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(date);
+}
 
 export interface NewspaperRouteDeps {
   registry: AgentRegistry;
@@ -24,22 +30,23 @@ export function createNewspaperRoutes(deps: NewspaperRouteDeps) {
     }
 
     const { executeNewspaperRun } = await import('../newspaper/newspaper-executor.ts');
-    const result = await executeNewspaperRun(deps.registry, deps.sessionManager, deps.heraldConfig);
-
-    return c.json({
-      runId: result.runId,
-      status: result.status,
-      editionDate: result.editionDate,
-      sourcesUsed: result.sourcesUsed,
-      sourcesMissing: result.sourcesMissing,
-    });
+    try {
+      const result = await executeNewspaperRun(deps.registry, deps.sessionManager, deps.heraldConfig);
+      return c.json({
+        runId: result.runId,
+        status: result.status,
+        editionDate: result.editionDate,
+        sourcesUsed: result.sourcesUsed,
+        sourcesMissing: result.sourcesMissing,
+      });
+    } catch (err) {
+      console.error('[herald:api] Newspaper run failed:', (err as Error).message);
+      return c.json({ error: 'Newspaper synthesis failed' }, 500);
+    }
   });
 
   // Get the latest newspaper edition
   routes.get('/api/newspaper/current', async (c) => {
-    const { readdir } = await import('node:fs/promises');
-    const { join } = await import('node:path');
-
     const editionsDir = join(deps.heraldConfig.newspaper_dir, 'editions');
     try {
       const editions = await readdir(editionsDir);
@@ -78,11 +85,13 @@ export function createNewspaperRoutes(deps: NewspaperRouteDeps) {
   routes.get('/api/newspaper/editions/:date', async (c) => {
     const { getEdition } = await import('../newspaper/edition-manager.ts');
     const date = c.req.param('date');
+    if (!isValidDate(date)) {
+      return c.json({ error: 'Invalid date format. Use YYYY-MM-DD' }, 400);
+    }
     const format = (c.req.query('format') ?? 'md') as 'pdf' | 'html' | 'md';
 
     if (format === 'pdf') {
       // For PDF, serve binary from filesystem directly
-      const { join } = await import('node:path');
       const pdfPath = join(deps.heraldConfig.newspaper_dir, 'editions', date, 'newspaper.pdf');
       const file = Bun.file(pdfPath);
       if (await file.exists()) {
@@ -104,6 +113,9 @@ export function createNewspaperRoutes(deps: NewspaperRouteDeps) {
   routes.get('/api/newspaper/editions/:date/source', async (c) => {
     const { getEditionSources } = await import('../newspaper/edition-manager.ts');
     const date = c.req.param('date');
+    if (!isValidDate(date)) {
+      return c.json({ error: 'Invalid date format. Use YYYY-MM-DD' }, 400);
+    }
     const result = await getEditionSources(deps.heraldConfig.newspaper_dir, date);
     if ('error' in result) {
       return c.json({ error: result.error }, 404);
@@ -122,6 +134,9 @@ export function createNewspaperRoutes(deps: NewspaperRouteDeps) {
   routes.get('/api/newspaper/weekly/:date', async (c) => {
     const { getWeekly } = await import('../newspaper/edition-manager.ts');
     const date = c.req.param('date');
+    if (!isValidDate(date)) {
+      return c.json({ error: 'Invalid date format. Use YYYY-MM-DD' }, 400);
+    }
     const result = await getWeekly(deps.heraldConfig.newspaper_dir, date);
     if ('error' in result) {
       return c.json({ error: result.error }, 404);
@@ -142,6 +157,9 @@ export function createNewspaperRoutes(deps: NewspaperRouteDeps) {
     } catch {
       date = new Date().toISOString().split('T')[0];
     }
+    if (!isValidDate(date)) {
+      return c.json({ error: 'Invalid date format. Use YYYY-MM-DD' }, 400);
+    }
 
     const result = await runNewspaperPipeline(date, deps.heraldConfig);
     return c.json(result);
@@ -149,9 +167,6 @@ export function createNewspaperRoutes(deps: NewspaperRouteDeps) {
 
   // Serve current edition PDF
   routes.get('/api/newspaper/current/pdf', async (c) => {
-    const { readdir } = await import('node:fs/promises');
-    const { join } = await import('node:path');
-
     const editionsDir = join(deps.heraldConfig.newspaper_dir, 'editions');
     try {
       const editions = await readdir(editionsDir);
@@ -178,9 +193,6 @@ export function createNewspaperRoutes(deps: NewspaperRouteDeps) {
 
   // Serve current edition HTML
   routes.get('/api/newspaper/current/html', async (c) => {
-    const { readdir } = await import('node:fs/promises');
-    const { join } = await import('node:path');
-
     const editionsDir = join(deps.heraldConfig.newspaper_dir, 'editions');
     try {
       const editions = await readdir(editionsDir);
@@ -207,9 +219,6 @@ export function createNewspaperRoutes(deps: NewspaperRouteDeps) {
 
   // Serve current edition markdown
   routes.get('/api/newspaper/current/markdown', async (c) => {
-    const { readdir } = await import('node:fs/promises');
-    const { join } = await import('node:path');
-
     const editionsDir = join(deps.heraldConfig.newspaper_dir, 'editions');
     try {
       const editions = await readdir(editionsDir);
@@ -224,7 +233,7 @@ export function createNewspaperRoutes(deps: NewspaperRouteDeps) {
         return c.json({ error: 'Markdown not available' }, 404);
       }
       return new Response(file.stream(), {
-        headers: { 'Content-Type': 'text/markdown' },
+        headers: { 'Content-Type': 'text/plain' },
       });
     } catch {
       return c.json({ error: 'No editions available' }, 404);
@@ -233,9 +242,10 @@ export function createNewspaperRoutes(deps: NewspaperRouteDeps) {
 
   // Serve specific edition PDF
   routes.get('/api/newspaper/editions/:date/pdf', async (c) => {
-    const { join } = await import('node:path');
-
     const date = c.req.param('date');
+    if (!isValidDate(date)) {
+      return c.json({ error: 'Invalid date format. Use YYYY-MM-DD' }, 400);
+    }
     const pdfPath = join(deps.heraldConfig.newspaper_dir, 'editions', date, 'newspaper.pdf');
     const file = Bun.file(pdfPath);
     if (!(await file.exists())) {
@@ -253,9 +263,10 @@ export function createNewspaperRoutes(deps: NewspaperRouteDeps) {
 
   // Serve specific edition HTML
   routes.get('/api/newspaper/editions/:date/html', async (c) => {
-    const { join } = await import('node:path');
-
     const date = c.req.param('date');
+    if (!isValidDate(date)) {
+      return c.json({ error: 'Invalid date format. Use YYYY-MM-DD' }, 400);
+    }
     const htmlPath = join(deps.heraldConfig.newspaper_dir, 'editions', date, 'newspaper.html');
     const file = Bun.file(htmlPath);
     if (!(await file.exists())) {
@@ -273,16 +284,17 @@ export function createNewspaperRoutes(deps: NewspaperRouteDeps) {
 
   // Serve specific edition markdown
   routes.get('/api/newspaper/editions/:date/markdown', async (c) => {
-    const { join } = await import('node:path');
-
     const date = c.req.param('date');
+    if (!isValidDate(date)) {
+      return c.json({ error: 'Invalid date format. Use YYYY-MM-DD' }, 400);
+    }
     const mdPath = join(deps.heraldConfig.newspaper_dir, 'editions', date, 'combined.typ');
     const file = Bun.file(mdPath);
     if (!(await file.exists())) {
       return c.json({ error: `Markdown not available for ${date}` }, 404);
     }
     return new Response(file.stream(), {
-      headers: { 'Content-Type': 'text/markdown' },
+      headers: { 'Content-Type': 'text/plain' },
     });
   });
 
@@ -324,8 +336,7 @@ export function createNewspaperRoutes(deps: NewspaperRouteDeps) {
   routes.get('/api/newspaper/updates/:date', async (c) => {
     const date = c.req.param('date');
 
-    // Validate date format (YYYY-MM-DD)
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    if (!isValidDate(date)) {
       return c.json({ error: 'Invalid date format. Use YYYY-MM-DD' }, 400);
     }
 

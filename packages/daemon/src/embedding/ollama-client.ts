@@ -6,6 +6,7 @@ export class OllamaEmbedder {
   private readonly baseUrl: string;
   private readonly model: string;
   private available: boolean | null = null;
+  private lastCheck: number | null = null;
 
   constructor(baseUrl = 'http://localhost:11434', model = 'mxbai-embed-large') {
     this.baseUrl = baseUrl.replace(/\/$/, '');
@@ -13,13 +14,15 @@ export class OllamaEmbedder {
   }
 
   async isAvailable(): Promise<boolean> {
-    if (this.available !== null) return this.available;
+    if (this.available === true) return true;
+    if (this.available === false && this.lastCheck && Date.now() - this.lastCheck < 60_000) return false;
     try {
       const res = await fetch(`${this.baseUrl}/api/tags`, { signal: AbortSignal.timeout(3000) });
       this.available = res.ok;
     } catch {
       this.available = false;
     }
+    this.lastCheck = Date.now();
     return this.available;
   }
 
@@ -28,6 +31,7 @@ export class OllamaEmbedder {
    */
   resetAvailability(): void {
     this.available = null;
+    this.lastCheck = null;
   }
 
   async embed(input: string | string[]): Promise<number[][] | null> {

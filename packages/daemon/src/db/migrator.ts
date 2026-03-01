@@ -39,7 +39,7 @@ export async function applyMigrations(db: Database, migrationsDir: string): Prom
     const sql = await readFile(join(migrationsDir, file), 'utf-8');
 
     db.transaction(() => {
-      db.run(sql);
+      db.exec(sql);
       db.run('INSERT INTO _migrations (filename) VALUES (?)', [file]);
     })();
 

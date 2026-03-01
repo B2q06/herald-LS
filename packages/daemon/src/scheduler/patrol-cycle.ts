@@ -31,6 +31,22 @@ export class PatrolCycleManager {
     registry: AgentRegistry,
     postRunContext?: PostRunContext,
   ): Promise<PatrolCycleResult> {
+    const cyclePromise = this._executeCycleInner(agents, heraldConfig, sessionManager, registry, postRunContext);
+    this.activeCycle = cyclePromise;
+    try {
+      return await cyclePromise;
+    } finally {
+      this.activeCycle = null;
+    }
+  }
+
+  private async _executeCycleInner(
+    agents: Array<{ name: string; config: AgentConfig }>,
+    heraldConfig: HeraldConfig,
+    sessionManager: SessionManager,
+    registry: AgentRegistry,
+    postRunContext?: PostRunContext,
+  ): Promise<PatrolCycleResult> {
     const cycleId = generateRunId();
     const startedAt = new Date().toISOString();
     const startMs = Date.now();
@@ -75,7 +91,6 @@ export class PatrolCycleManager {
     };
 
     this.lastCycleResult = cycleResult;
-    this.activeCycle = null;
 
     const successCount = agentResults.filter((a) => a.status === 'success').length;
     console.log(

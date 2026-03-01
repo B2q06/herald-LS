@@ -97,17 +97,19 @@ export async function loadPersonaContext(
   // 6. Inject knowledge with write instructions
   const absKnowledgePath = resolve(knowledgePath);
   if (knowledgeContent.trim().length > 0) {
+    const relativePath = absKnowledgePath.replace(heraldConfig.memory_dir + '/', '');
     systemPrompt += `\n\n## Your Knowledge Base
 The following is your persistent knowledge. After your patrol, update the relevant sections if you formed new opinions, made predictions, or gained domain knowledge.
 
-Knowledge file location: ${absKnowledgePath}
+Knowledge file location: ${relativePath}
 
 ${knowledgeContent}`;
   } else {
+    const relativePath = absKnowledgePath.replace(heraldConfig.memory_dir + '/', '');
     systemPrompt += `\n\n## Your Knowledge Base
 Your knowledge base is empty — this may be your first patrol. After your patrol, write your initial domain knowledge, opinions, and predictions.
 
-Knowledge file location: ${absKnowledgePath}`;
+Knowledge file location: ${relativePath}`;
   }
 
   // 7. Inject discovery mode behavioral rules

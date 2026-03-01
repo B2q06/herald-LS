@@ -1,6 +1,6 @@
 import { mkdir, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { type BreakingEvent, BreakingEventSchema, type HeraldConfig } from '@herald/shared';
+import { BreakingEventSchema, type BreakingEvent, type HeraldConfig } from '@herald/shared';
 import { commitEdition } from './git-versioner.ts';
 import { runNewspaperPipeline } from './pipeline.ts';
 
@@ -34,7 +34,8 @@ function generateUpdateId(): string {
   const h = String(now.getUTCHours()).padStart(2, '0');
   const m = String(now.getUTCMinutes()).padStart(2, '0');
   const s = String(now.getUTCSeconds()).padStart(2, '0');
-  return `update-${h}${m}${s}`;
+  const ms = String(now.getUTCMilliseconds()).padStart(3, '0');
+  return `update-${h}${m}${s}-${ms}`;
 }
 
 /**
@@ -51,7 +52,6 @@ export async function processBreakingUpdate(
   event: BreakingEvent,
   deps: BreakingUpdateDeps,
 ): Promise<BreakingUpdateResult> {
-  // Validate the event
   BreakingEventSchema.parse(event);
 
   const editionDate = getCurrentEditionDate();

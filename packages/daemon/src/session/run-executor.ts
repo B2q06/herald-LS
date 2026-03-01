@@ -31,7 +31,8 @@ export function generateRunId(): string {
   const h = String(now.getUTCHours()).padStart(2, '0');
   const mi = String(now.getUTCMinutes()).padStart(2, '0');
   const s = String(now.getUTCSeconds()).padStart(2, '0');
-  return `${y}${mo}${d}-${h}${mi}${s}`;
+  const rand = Math.random().toString(36).slice(2, 6);
+  return `${y}${mo}${d}-${h}${mi}${s}-${rand}`;
 }
 
 async function writeReport(

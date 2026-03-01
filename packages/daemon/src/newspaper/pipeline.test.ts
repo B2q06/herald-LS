@@ -340,7 +340,7 @@ describe('getEditionStatus', () => {
     expect(status.hasSources).toBe(false);
     expect(status.hasPdf).toBe(false);
     expect(status.hasHtml).toBe(false);
-    expect(status.hasMarkdown).toBe(false);
+    expect(status.hasTypst).toBe(false);
   });
 
   it('detects sources directory', async () => {
@@ -382,8 +382,8 @@ describe('getEditionStatus', () => {
 
     const status = await getEditionStatus('2026-02-28', heraldConfig);
 
-    expect(status.hasMarkdown).toBe(true);
-    expect(status.markdownPath).toContain('combined.typ');
+    expect(status.hasTypst).toBe(true);
+    expect(status.typstPath).toContain('combined.typ');
   });
 
   it('returns complete status with all files present', async () => {
@@ -400,6 +400,6 @@ describe('getEditionStatus', () => {
     expect(status.hasSources).toBe(true);
     expect(status.hasPdf).toBe(true);
     expect(status.hasHtml).toBe(true);
-    expect(status.hasMarkdown).toBe(true);
+    expect(status.hasTypst).toBe(true);
   });
 });

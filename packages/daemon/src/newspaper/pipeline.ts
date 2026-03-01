@@ -26,10 +26,10 @@ export interface EditionStatus {
   hasSources: boolean;
   hasPdf: boolean;
   hasHtml: boolean;
-  hasMarkdown: boolean;
+  hasTypst: boolean;
   pdfPath?: string;
   htmlPath?: string;
-  markdownPath?: string;
+  typstPath?: string;
 }
 
 /** Compiler function type for dependency injection in tests */
@@ -106,8 +106,10 @@ export async function runNewspaperPipeline(
       'newspaper-md': combinedPath,
     };
 
-    const pdfResult = await compiler(templatePath, pdfPath, 'pdf', inputs);
-    const htmlResult = await compiler(templatePath, htmlPath, 'html', inputs);
+    const [pdfResult, htmlResult] = await Promise.all([
+      compiler(templatePath, pdfPath, 'pdf', inputs),
+      compiler(templatePath, htmlPath, 'html', inputs),
+    ]);
 
     if (!pdfResult.success) {
       errors.push(pdfResult.error ?? 'PDF compilation failed');
@@ -137,7 +139,7 @@ export async function runNewspaperPipeline(
     const error = err instanceof Error ? err.message : String(err);
     console.error(`[herald] Newspaper pipeline error: ${error}`);
     errors.push(error);
-    return { status: 'no-sources', errors };
+    return { status: 'source-only', errors };
   }
 }
 
@@ -155,7 +157,7 @@ export async function getEditionStatus(
     hasSources: false,
     hasPdf: false,
     hasHtml: false,
-    hasMarkdown: false,
+    hasTypst: false,
   };
 
   try {
@@ -189,11 +191,11 @@ export async function getEditionStatus(
     }
 
     // Check combined markdown
-    const markdownPath = join(editionDir, 'combined.typ');
+    const typstPath = join(editionDir, 'combined.typ');
     try {
-      await stat(markdownPath);
-      status.hasMarkdown = true;
-      status.markdownPath = markdownPath;
+      await stat(typstPath);
+      status.hasTypst = true;
+      status.typstPath = typstPath;
     } catch {
       // Combined file doesn't exist
     }

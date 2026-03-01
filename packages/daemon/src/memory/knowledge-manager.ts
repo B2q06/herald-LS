@@ -23,7 +23,13 @@ export class KnowledgeManager {
    * Returns the number of items upserted (inserted or updated).
    */
   async syncKnowledge(agentName: string, knowledgePath: string): Promise<number> {
-    const raw = await readFile(knowledgePath, 'utf-8');
+    let raw: string;
+    try {
+      raw = await readFile(knowledgePath, 'utf-8');
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code === 'ENOENT') return 0;
+      throw err;
+    }
     const parsed = parseKnowledgeMd(raw);
 
     const upsert = this.db.db.prepare(`

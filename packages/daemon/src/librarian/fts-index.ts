@@ -14,6 +14,7 @@ export class FtsIndex {
 
   /**
    * Insert a document into the FTS5 virtual table.
+   * Deletes any existing entries with the same source_id before inserting to prevent duplicates.
    */
   insert(
     agentName: string,
@@ -22,6 +23,10 @@ export class FtsIndex {
     title: string,
     content: string,
   ): void {
+    this.db.db.run(
+      `DELETE FROM fts_content WHERE source_id = ? AND agent_name = ?`,
+      [sourceId, agentName],
+    );
     this.db.db.run(
       `INSERT INTO fts_content (agent_name, source_type, source_id, title, content)
        VALUES (?, ?, ?, ?, ?)`,

@@ -12,7 +12,7 @@ describe('post-run-hook', () => {
   let mockEmbedder: OllamaEmbedder;
 
   beforeEach(async () => {
-    tempDir = join(tmpdir(), `herald-hook-test-${Date.now()}`);
+    tempDir = join(tmpdir(), `herald-hook-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
     await mkdir(tempDir, { recursive: true });
     const dbPath = join(tempDir, 'test.sqlite');
 

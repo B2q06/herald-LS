@@ -81,7 +81,7 @@ export async function listEditions(newspaperDir: string): Promise<EditionSummary
   // Merge filesystem data (always available, may have more info like formats)
   const editionsDir = join(newspaperDir, 'editions');
   try {
-    const fsDates = await readdir(editionsDir);
+    const fsDates = (await readdir(editionsDir)).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d));
     for (const date of fsDates) {
       const existing = editionMap.get(date);
       const formats = await detectFormats(join(editionsDir, date));
@@ -238,7 +238,7 @@ export async function getWeekly(
   }
 
   // Filesystem fallback — try .md first, then .pdf
-  for (const ext of ['md', 'pdf']) {
+  for (const ext of ['md']) {
     const filePath = join(newspaperDir, 'weekly', `${date}-weekly.${ext}`);
     const file = Bun.file(filePath);
     if (await file.exists()) {
@@ -319,10 +319,10 @@ function extractDateFromWeeklyFilename(filename: string): string | null {
 }
 
 function getWeekStart(dateStr: string): string {
-  const date = new Date(dateStr);
-  const day = date.getDay();
+  const date = new Date(dateStr + 'T00:00:00Z');
+  const day = date.getUTCDay();
   // Monday = start of week (ISO)
   const diff = day === 0 ? 6 : day - 1;
-  date.setDate(date.getDate() - diff);
+  date.setUTCDate(date.getUTCDate() - diff);
   return date.toISOString().split('T')[0];
 }

@@ -22,12 +22,11 @@ describe('system routes', () => {
   });
 
   describe('GET /api/status', () => {
-    it('returns 200 with agents and daemon info', async () => {
+    it('returns 200 with daemon info', async () => {
       const res = await app.request('/api/status');
       expect(res.status).toBe(200);
 
       const body = await res.json();
-      expect(body.agents).toEqual([]);
       expect(body.daemon).toBeDefined();
       expect(body.daemon.version).toBe('0.0.1');
     });

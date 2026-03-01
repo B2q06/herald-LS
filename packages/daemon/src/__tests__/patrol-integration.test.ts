@@ -196,7 +196,7 @@ describe('Patrol Integration — Full Research Agent Roster', () => {
     expect(result.agents).toHaveLength(3);
     for (const agentResult of result.agents) {
       expect(agentResult.status).toBe('success');
-      expect(agentResult.runId).toMatch(/^\d{8}-\d{6}$/);
+      expect(agentResult.runId).toMatch(/^\d{8}-\d{6}-[a-z0-9]{4}$/);
     }
   });
 
@@ -248,7 +248,7 @@ describe('Patrol Integration — Full Research Agent Roster', () => {
       const agent = registry.get(config.name);
       expect(agent?.lastRun).toBeDefined();
       expect(agent?.lastRun?.status).toBe('success');
-      expect(agent?.lastRun?.runId).toMatch(/^\d{8}-\d{6}$/);
+      expect(agent?.lastRun?.runId).toMatch(/^\d{8}-\d{6}-[a-z0-9]{4}$/);
     }
   });
 

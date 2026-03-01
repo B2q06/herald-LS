@@ -2,6 +2,12 @@ import { Database } from 'bun:sqlite';
 import * as sqliteVec from 'sqlite-vec';
 import { applyMigrations } from './migrator.ts';
 
+function validateAgentName(name: string): void {
+  if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
+    throw new Error(`Invalid agent name: "${name}" — only alphanumeric, hyphens, and underscores allowed`);
+  }
+}
+
 export class HeraldDatabase {
   public readonly db: Database;
   private vecLoaded = false;
@@ -48,6 +54,7 @@ export class HeraldDatabase {
   }
 
   vecTableName(agentName: string): string {
+    validateAgentName(agentName);
     return `vec_embeddings_${agentName.replace(/-/g, '_')}`;
   }
 

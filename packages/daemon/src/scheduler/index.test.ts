@@ -24,11 +24,13 @@ describe('initScheduler', () => {
     sessionManager = {} as SessionManager;
     heraldConfig = {
       port: 3000,
+      data_dir: '/tmp/data',
       agents_dir: '/tmp/agents',
       personas_dir: '/tmp/personas',
       memory_dir: '/tmp/memory',
       reports_dir: '/tmp/reports',
-      transcripts_dir: '/tmp/transcripts',
+      newspaper_dir: '/tmp/newspaper',
+      log_level: 'info',
     };
   });
 

@@ -15,29 +15,32 @@ export function initScheduler(
   const scheduleRegistry = new ScheduleRegistry();
 
   for (const [name, agent] of agentRegistry.getAll()) {
+    if (name === 'newspaper') continue;  // newspaper has dedicated handling below
     if (!agent.config.schedule) continue;
 
-    if (name === 'newspaper') {
-      // Newspaper agent uses the team orchestration pipeline
-      scheduleRegistry.register(`newspaper:${agent.config.schedule}`, agent.config.schedule, () => {
-        console.log('[herald] Newspaper synthesis firing');
-        import('../newspaper/newspaper-executor.ts')
-          .then(({ executeNewspaperRun }) =>
-            executeNewspaperRun(agentRegistry, sessionManager, heraldConfig),
-          )
-          .catch((err) => {
-            console.error('[herald] Newspaper synthesis error:', err);
-          });
+    // Standard patrol agent
+    scheduleRegistry.register(name, agent.config.schedule, () => {
+      console.log(`[herald] Scheduled run: ${name} (cron: ${agent.config.schedule})`);
+      executeRun(name, agent.config, heraldConfig, sessionManager, undefined, undefined, postRunContext).catch((err) => {
+        console.error(`[herald] Scheduled run failed for ${name}:`, err);
       });
-    } else {
-      // Standard patrol agent
-      scheduleRegistry.register(name, agent.config.schedule, () => {
-        console.log(`[herald] Scheduled run: ${name} (cron: ${agent.config.schedule})`);
-        executeRun(name, agent.config, heraldConfig, sessionManager, undefined, undefined, postRunContext).catch((err) => {
-          console.error(`[herald] Scheduled run failed for ${name}:`, err);
+    });
+  }
+
+  // Dedicated newspaper handling — uses team orchestration pipeline
+  const newspaperRegistered = agentRegistry.get('newspaper');
+  if (newspaperRegistered && newspaperRegistered.config.schedule) {
+    const agent = newspaperRegistered;
+    scheduleRegistry.register(`newspaper:${agent.config.schedule}`, agent.config.schedule, () => {
+      console.log('[herald] Newspaper synthesis firing');
+      import('../newspaper/newspaper-executor.ts')
+        .then(({ executeNewspaperRun }) =>
+          executeNewspaperRun(agentRegistry, sessionManager, heraldConfig),
+        )
+        .catch((err) => {
+          console.error('[herald] Newspaper synthesis error:', err);
         });
-      });
-    }
+    });
   }
 
   // Weekly synthesis cron — Friday 5 PM

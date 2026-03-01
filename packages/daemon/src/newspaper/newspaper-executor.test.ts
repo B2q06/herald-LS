@@ -139,7 +139,7 @@ describe('newspaper-executor', () => {
 
       const result = await executeNewspaperRun(registry, sessionManager, heraldConfig);
 
-      expect(result.runId).toMatch(/^\d{8}-\d{6}$/);
+      expect(result.runId).toMatch(/^\d{8}-\d{6}-[a-z0-9]{4}$/);
       expect(result.status).toBe('success');
     });
 

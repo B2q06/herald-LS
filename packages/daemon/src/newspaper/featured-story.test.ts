@@ -42,7 +42,7 @@ describe('featured-story', () => {
   });
 
   beforeEach(async () => {
-    tempDir = join(tmpdir(), `herald-featured-test-${Date.now()}`);
+    tempDir = join(tmpdir(), `herald-featured-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
     const personasDir = join(tempDir, 'personas');
     const memoryDir = join(tempDir, 'memory');
 

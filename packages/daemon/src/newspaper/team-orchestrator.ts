@@ -1,4 +1,4 @@
-import { readdir } from 'node:fs/promises';
+import { mkdir, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { HeraldConfig } from '@herald/shared';
 import type { AgentRegistry } from '../agent-loader/agent-registry.ts';
@@ -43,7 +43,8 @@ export async function gatherResearchReports(
       const content = await Bun.file(join(reportsDir, latestFile)).text();
 
       // Check if the report has status: failed in frontmatter
-      if (content.includes('status: failed')) {
+      const frontmatter = content.match(/^---\n([\s\S]*?)\n---/)?.[1] ?? '';
+      if (frontmatter.includes('status: failed')) {
         missing.push(name);
         continue;
       }
@@ -115,7 +116,6 @@ export async function ensureEditionDir(
   heraldConfig: HeraldConfig,
   editionDate: string,
 ): Promise<string> {
-  const { mkdir } = await import('node:fs/promises');
   const editionDir = join(heraldConfig.newspaper_dir, 'editions', editionDate);
   const sourcesDir = join(editionDir, 'sources');
   await mkdir(sourcesDir, { recursive: true });

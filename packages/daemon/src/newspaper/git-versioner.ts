@@ -1,6 +1,15 @@
 import { cp, mkdir } from 'node:fs/promises';
 import { basename, join } from 'node:path';
 
+let gitLock: Promise<void> = Promise.resolve();
+
+function withGitLock<T>(fn: () => Promise<T>): Promise<T> {
+  const prev = gitLock;
+  let resolve: () => void;
+  gitLock = new Promise<void>((r) => { resolve = r; });
+  return prev.then(fn).finally(() => resolve!());
+}
+
 export interface GitCommitResult {
   success: boolean;
   commitHash?: string;
@@ -68,8 +77,11 @@ export async function ensureNewspaperBranch(repoPath: string): Promise<void> {
   if (currentBranch) {
     await runGit(['switch', currentBranch], repoPath);
   } else {
-    // Detached HEAD or no branch — try main
-    await runGit(['switch', 'main'], repoPath);
+    // Detached HEAD — try common default branch names
+    for (const branch of ['main', 'master']) {
+      const { exitCode } = await runGit(['switch', branch], repoPath);
+      if (exitCode === 0) break;
+    }
   }
 }
 
@@ -93,99 +105,101 @@ export async function commitEdition(
   commitMessage: string,
   repoPath?: string,
 ): Promise<GitCommitResult> {
-  let repoRoot: string;
-  try {
-    repoRoot = repoPath ?? await getRepoRoot(editionDir);
-  } catch {
-    return { success: false, error: 'Not inside a git repository', fallbackPath: editionDir };
-  }
-
-  let currentBranch = '';
-  let didStash = false;
-
-  try {
-    // Save current branch
-    const branchResult = await runGit(['branch', '--show-current'], repoRoot);
-    currentBranch = branchResult.stdout;
-
-    // Stash uncommitted work BEFORE any branch operations
-    const stashResult = await runGit(['stash', 'push', '-m', 'herald-auto-stash'], repoRoot);
-    didStash = !stashResult.stdout.includes('No local changes');
-
-    // Ensure newspaper branch exists (safe to do after stash)
-    await ensureNewspaperBranch(repoRoot);
-
-    // Switch to newspaper branch
-    const switchResult = await runGit(['switch', 'newspaper'], repoRoot);
-    if (switchResult.exitCode !== 0) {
-      // Force checkout as fallback (safe: we're about to overwrite newspaper content anyway)
-      const forceResult = await runGit(['checkout', '-f', 'newspaper'], repoRoot);
-      if (forceResult.exitCode !== 0) {
-        return {
-          success: false,
-          error: `Failed to switch to newspaper branch: ${forceResult.stderr}`,
-          fallbackPath: editionDir,
-        };
-      }
-    }
-
-    // Extract date from edition directory path (e.g., .../editions/2026-02-28/ -> 2026-02-28)
-    const editionDate = basename(editionDir);
-
-    // Create editions directory on newspaper branch
-    const targetDir = join(repoRoot, 'editions', editionDate);
-    await mkdir(targetDir, { recursive: true });
-
-    // Copy edition files
-    await cp(editionDir, targetDir, { recursive: true });
-
-    // Stage all files
-    await runGit(['add', '-A'], repoRoot);
-
-    // Check if there are staged changes
-    const diffResult = await runGit(['diff', '--cached', '--quiet'], repoRoot);
-    if (diffResult.exitCode === 0) {
-      // Nothing to commit — files are identical
-      console.log('[herald] No changes to commit for edition');
-      return await switchBackAndPopStash(repoRoot, currentBranch, didStash, undefined);
-    }
-
-    // Commit
-    const commitResult = await runGit(['commit', '-m', commitMessage], repoRoot);
-    if (commitResult.exitCode !== 0) {
-      console.error('[herald] Git commit failed:', commitResult.stderr);
-      return await switchBackAndPopStash(repoRoot, currentBranch, didStash, {
-        success: false,
-        error: `Commit failed: ${commitResult.stderr}`,
-        fallbackPath: editionDir,
-      });
-    }
-
-    // Get commit hash
-    const hashResult = await runGit(['rev-parse', 'HEAD'], repoRoot);
-    const commitHash = hashResult.stdout;
-
-    console.log(`[herald] Edition committed: ${commitHash.slice(0, 7)} — ${commitMessage}`);
-
-    return await switchBackAndPopStash(repoRoot, currentBranch, didStash, {
-      success: true,
-      commitHash,
-    });
-  } catch (err) {
-    console.error('[herald] Git versioning error:', err);
-    // Best-effort recovery: try to switch back
+  return withGitLock(async () => {
+    let repoRoot: string;
     try {
-      await switchBackAndPopStash(repoRoot, currentBranch, didStash, undefined);
+      repoRoot = repoPath ?? await getRepoRoot(editionDir);
     } catch {
-      // Recovery failed — log but don't throw
-      console.error('[herald] Failed to recover git state after error');
+      return { success: false, error: 'Not inside a git repository', fallbackPath: editionDir };
     }
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : String(err),
-      fallbackPath: editionDir,
-    };
-  }
+
+    let currentBranch = '';
+    let didStash = false;
+
+    try {
+      // Save current branch
+      const branchResult = await runGit(['branch', '--show-current'], repoRoot);
+      currentBranch = branchResult.stdout;
+
+      // Stash uncommitted work BEFORE any branch operations
+      const stashResult = await runGit(['stash', 'push', '-m', 'herald-auto-stash'], repoRoot);
+      didStash = stashResult.exitCode === 0 && !stashResult.stdout.includes('No local changes to save');
+
+      // Ensure newspaper branch exists (safe to do after stash)
+      await ensureNewspaperBranch(repoRoot);
+
+      // Switch to newspaper branch
+      const switchResult = await runGit(['switch', 'newspaper'], repoRoot);
+      if (switchResult.exitCode !== 0) {
+        // Force checkout as fallback (safe: we're about to overwrite newspaper content anyway)
+        const forceResult = await runGit(['checkout', '-f', 'newspaper'], repoRoot);
+        if (forceResult.exitCode !== 0) {
+          return {
+            success: false,
+            error: `Failed to switch to newspaper branch: ${forceResult.stderr}`,
+            fallbackPath: editionDir,
+          };
+        }
+      }
+
+      // Extract date from edition directory path (e.g., .../editions/2026-02-28/ -> 2026-02-28)
+      const editionDate = basename(editionDir);
+
+      // Create editions directory on newspaper branch
+      const targetDir = join(repoRoot, 'editions', editionDate);
+      await mkdir(targetDir, { recursive: true });
+
+      // Copy edition files
+      await cp(editionDir, targetDir, { recursive: true });
+
+      // Stage all files
+      await runGit(['add', '-A'], repoRoot);
+
+      // Check if there are staged changes
+      const diffResult = await runGit(['diff', '--cached', '--quiet'], repoRoot);
+      if (diffResult.exitCode === 0) {
+        // Nothing to commit — files are identical
+        console.log('[herald] No changes to commit for edition');
+        return await switchBackAndPopStash(repoRoot, currentBranch, didStash, undefined);
+      }
+
+      // Commit
+      const commitResult = await runGit(['commit', '-m', commitMessage], repoRoot);
+      if (commitResult.exitCode !== 0) {
+        console.error('[herald] Git commit failed:', commitResult.stderr);
+        return await switchBackAndPopStash(repoRoot, currentBranch, didStash, {
+          success: false,
+          error: `Commit failed: ${commitResult.stderr}`,
+          fallbackPath: editionDir,
+        });
+      }
+
+      // Get commit hash
+      const hashResult = await runGit(['rev-parse', 'HEAD'], repoRoot);
+      const commitHash = hashResult.stdout;
+
+      console.log(`[herald] Edition committed: ${commitHash.slice(0, 7)} — ${commitMessage}`);
+
+      return await switchBackAndPopStash(repoRoot, currentBranch, didStash, {
+        success: true,
+        commitHash,
+      });
+    } catch (err) {
+      console.error('[herald] Git versioning error:', err);
+      // Best-effort recovery: try to switch back
+      try {
+        await switchBackAndPopStash(repoRoot, currentBranch, didStash, undefined);
+      } catch {
+        // Recovery failed — log but don't throw
+        console.error('[herald] Failed to recover git state after error');
+      }
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : String(err),
+        fallbackPath: editionDir,
+      };
+    }
+  });
 }
 
 /**
@@ -196,94 +210,96 @@ export async function commitWeekly(
   commitMessage: string,
   repoPath?: string,
 ): Promise<GitCommitResult> {
-  let repoRoot: string;
-  try {
-    repoRoot = repoPath ?? await getRepoRoot(weeklyPath);
-  } catch {
-    return { success: false, error: 'Not inside a git repository', fallbackPath: weeklyPath };
-  }
-
-  let currentBranch = '';
-  let didStash = false;
-
-  try {
-    const branchResult = await runGit(['branch', '--show-current'], repoRoot);
-    currentBranch = branchResult.stdout;
-
-    const stashResult = await runGit(['stash', 'push', '-m', 'herald-auto-stash'], repoRoot);
-    didStash = !stashResult.stdout.includes('No local changes');
-
-    await ensureNewspaperBranch(repoRoot);
-
-    const switchResult = await runGit(['switch', 'newspaper'], repoRoot);
-    if (switchResult.exitCode !== 0) {
-      const forceResult = await runGit(['checkout', '-f', 'newspaper'], repoRoot);
-      if (forceResult.exitCode !== 0) {
-        return {
-          success: false,
-          error: `Failed to switch to newspaper branch: ${forceResult.stderr}`,
-          fallbackPath: weeklyPath,
-        };
-      }
-    }
-
-    // Create weekly directory on newspaper branch
-    const weeklyDir = join(repoRoot, 'weekly');
-    await mkdir(weeklyDir, { recursive: true });
-
-    // Copy weekly file(s)
-    const weeklyFilename = basename(weeklyPath);
-    const targetPath = join(weeklyDir, weeklyFilename);
-
-    // weeklyPath could be a file or directory
-    const file = Bun.file(weeklyPath);
-    if (await file.exists()) {
-      // Single file
-      await Bun.write(targetPath, file);
-    } else {
-      // Directory — copy recursively
-      await cp(weeklyPath, join(weeklyDir, basename(weeklyPath)), { recursive: true });
-    }
-
-    await runGit(['add', '-A'], repoRoot);
-
-    const diffResult = await runGit(['diff', '--cached', '--quiet'], repoRoot);
-    if (diffResult.exitCode === 0) {
-      console.log('[herald] No changes to commit for weekly');
-      return await switchBackAndPopStash(repoRoot, currentBranch, didStash, undefined);
-    }
-
-    const commitResult = await runGit(['commit', '-m', commitMessage], repoRoot);
-    if (commitResult.exitCode !== 0) {
-      return await switchBackAndPopStash(repoRoot, currentBranch, didStash, {
-        success: false,
-        error: `Commit failed: ${commitResult.stderr}`,
-        fallbackPath: weeklyPath,
-      });
-    }
-
-    const hashResult = await runGit(['rev-parse', 'HEAD'], repoRoot);
-    const commitHash = hashResult.stdout;
-
-    console.log(`[herald] Weekly committed: ${commitHash.slice(0, 7)} — ${commitMessage}`);
-
-    return await switchBackAndPopStash(repoRoot, currentBranch, didStash, {
-      success: true,
-      commitHash,
-    });
-  } catch (err) {
-    console.error('[herald] Git versioning error (weekly):', err);
+  return withGitLock(async () => {
+    let repoRoot: string;
     try {
-      await switchBackAndPopStash(repoRoot, currentBranch, didStash, undefined);
+      repoRoot = repoPath ?? await getRepoRoot(weeklyPath);
     } catch {
-      console.error('[herald] Failed to recover git state after weekly error');
+      return { success: false, error: 'Not inside a git repository', fallbackPath: weeklyPath };
     }
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : String(err),
-      fallbackPath: weeklyPath,
-    };
-  }
+
+    let currentBranch = '';
+    let didStash = false;
+
+    try {
+      const branchResult = await runGit(['branch', '--show-current'], repoRoot);
+      currentBranch = branchResult.stdout;
+
+      const stashResult = await runGit(['stash', 'push', '-m', 'herald-auto-stash'], repoRoot);
+      didStash = stashResult.exitCode === 0 && !stashResult.stdout.includes('No local changes to save');
+
+      await ensureNewspaperBranch(repoRoot);
+
+      const switchResult = await runGit(['switch', 'newspaper'], repoRoot);
+      if (switchResult.exitCode !== 0) {
+        const forceResult = await runGit(['checkout', '-f', 'newspaper'], repoRoot);
+        if (forceResult.exitCode !== 0) {
+          return {
+            success: false,
+            error: `Failed to switch to newspaper branch: ${forceResult.stderr}`,
+            fallbackPath: weeklyPath,
+          };
+        }
+      }
+
+      // Create weekly directory on newspaper branch
+      const weeklyDir = join(repoRoot, 'weekly');
+      await mkdir(weeklyDir, { recursive: true });
+
+      // Copy weekly file(s)
+      const weeklyFilename = basename(weeklyPath);
+      const targetPath = join(weeklyDir, weeklyFilename);
+
+      // weeklyPath could be a file or directory
+      const file = Bun.file(weeklyPath);
+      if (await file.exists()) {
+        // Single file
+        await Bun.write(targetPath, file);
+      } else {
+        // Directory — copy recursively
+        await cp(weeklyPath, join(weeklyDir, basename(weeklyPath)), { recursive: true });
+      }
+
+      await runGit(['add', '-A'], repoRoot);
+
+      const diffResult = await runGit(['diff', '--cached', '--quiet'], repoRoot);
+      if (diffResult.exitCode === 0) {
+        console.log('[herald] No changes to commit for weekly');
+        return await switchBackAndPopStash(repoRoot, currentBranch, didStash, undefined);
+      }
+
+      const commitResult = await runGit(['commit', '-m', commitMessage], repoRoot);
+      if (commitResult.exitCode !== 0) {
+        return await switchBackAndPopStash(repoRoot, currentBranch, didStash, {
+          success: false,
+          error: `Commit failed: ${commitResult.stderr}`,
+          fallbackPath: weeklyPath,
+        });
+      }
+
+      const hashResult = await runGit(['rev-parse', 'HEAD'], repoRoot);
+      const commitHash = hashResult.stdout;
+
+      console.log(`[herald] Weekly committed: ${commitHash.slice(0, 7)} — ${commitMessage}`);
+
+      return await switchBackAndPopStash(repoRoot, currentBranch, didStash, {
+        success: true,
+        commitHash,
+      });
+    } catch (err) {
+      console.error('[herald] Git versioning error (weekly):', err);
+      try {
+        await switchBackAndPopStash(repoRoot, currentBranch, didStash, undefined);
+      } catch {
+        console.error('[herald] Failed to recover git state after weekly error');
+      }
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : String(err),
+        fallbackPath: weeklyPath,
+      };
+    }
+  });
 }
 
 /**
@@ -292,7 +308,7 @@ export async function commitWeekly(
  */
 export async function getEditionLog(repoPath: string): Promise<GitLogEntry[]> {
   const { exitCode, stdout } = await runGit(
-    ['log', '--oneline', '--format=%H %s', 'newspaper'],
+    ['log', '--format=%H %s', 'newspaper'],
     repoPath,
   );
 
@@ -342,9 +358,12 @@ async function switchBackAndPopStash(
   if (originalBranch) {
     const switchBack = await runGit(['switch', originalBranch], repoRoot);
     if (switchBack.exitCode !== 0) {
-      // Fallback to main
       console.warn('[herald] Failed to switch back to original branch, trying main');
-      await runGit(['switch', 'main'], repoRoot);
+      const mainSwitch = await runGit(['switch', 'main'], repoRoot);
+      if (mainSwitch.exitCode !== 0) {
+        console.error('[herald] Failed to switch to any branch — repo may be on newspaper branch');
+        return { success: false, error: 'Failed to restore git branch state' };
+      }
     }
   }
 

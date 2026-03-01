@@ -114,21 +114,11 @@ export async function triggerFeaturedStoryResearch(
   };
 
   // Check if the assigned agent exists
-  if (!registry.has(story.assigned_agent)) {
+  const agent = registry.get(story.assigned_agent);
+  if (!agent) {
     console.warn(
       `[herald:newspaper] Featured story assigned to unknown agent "${story.assigned_agent}" -- skipping`,
     );
-    reportLink.status = 'failed';
-    return {
-      headline: story.headline,
-      assignedAgent: story.assigned_agent,
-      runResult: null,
-      reportLink,
-    };
-  }
-
-  const agent = registry.get(story.assigned_agent);
-  if (!agent) {
     reportLink.status = 'failed';
     return {
       headline: story.headline,

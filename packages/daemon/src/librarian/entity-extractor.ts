@@ -172,6 +172,35 @@ const TECH_ACRONYMS = new Set([
   'FTS',
 ]);
 
+// Pre-compiled regex Maps for performance (compiled once at module load)
+const KNOWN_ORGS_RE = new Map<string, RegExp>(
+  [...KNOWN_ORGS].map((org) => {
+    const escaped = org.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return [org, new RegExp(`\\b${escaped}\\b`, 'i')];
+  }),
+);
+
+const KNOWN_TECH_RE = new Map<string, RegExp>(
+  [...KNOWN_TECH].map((tech) => {
+    const escaped = tech.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return [tech, new RegExp(`\\b${escaped}\\b`, 'i')];
+  }),
+);
+
+const KNOWN_EVENTS_RE = new Map<string, RegExp>(
+  [...KNOWN_EVENTS].map((event) => {
+    const escaped = event.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return [event, new RegExp(`\\b${escaped}(?:\\s+\\d{4})?\\b`, 'i')];
+  }),
+);
+
+const TECH_ACRONYMS_RE = new Map<string, RegExp>(
+  [...TECH_ACRONYMS].map((acronym) => {
+    const escaped = acronym.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return [acronym, new RegExp(`\\b${escaped}\\b`)];
+  }),
+);
+
 // People-indicating keywords (must appear near a Name Surname pattern)
 const PEOPLE_KEYWORDS =
   /\b(?:researcher|professor|ceo|cto|founder|co-founder|cofounder|chief|director|scientist|engineer|lead|head|vp|president|author|created by|founded by|developed by|proposed by|introduced by|led by|dr\.?|prof\.?)\b/i;
@@ -201,28 +230,21 @@ export function extractEntities(text: string): ExtractedEntity[] {
   };
 
   // Extract known orgs (case-insensitive matching but preserve original casing from set)
-  for (const org of KNOWN_ORGS) {
-    const escaped = org.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const re = new RegExp(`\\b${escaped}\\b`, 'i');
+  for (const [org, re] of KNOWN_ORGS_RE) {
     if (re.test(text)) {
       addEntity(org, 'org');
     }
   }
 
   // Extract known tech terms
-  for (const tech of KNOWN_TECH) {
-    const escaped = tech.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const re = new RegExp(`\\b${escaped}\\b`, 'i');
+  for (const [tech, re] of KNOWN_TECH_RE) {
     if (re.test(text)) {
       addEntity(tech, 'tech');
     }
   }
 
   // Extract known events
-  for (const event of KNOWN_EVENTS) {
-    const escaped = event.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    // Events often have year suffix: NeurIPS 2024, ICML 2025
-    const re = new RegExp(`\\b${escaped}(?:\\s+\\d{4})?\\b`, 'i');
+  for (const [, re] of KNOWN_EVENTS_RE) {
     const match = text.match(re);
     if (match) {
       addEntity(match[0], 'event');
@@ -230,9 +252,7 @@ export function extractEntities(text: string): ExtractedEntity[] {
   }
 
   // Extract tech acronyms (case-sensitive for precision)
-  for (const acronym of TECH_ACRONYMS) {
-    const escaped = acronym.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const re = new RegExp(`\\b${escaped}\\b`);
+  for (const [acronym, re] of TECH_ACRONYMS_RE) {
     if (re.test(text)) {
       addEntity(acronym, 'tech');
     }

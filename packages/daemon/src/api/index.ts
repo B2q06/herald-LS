@@ -10,7 +10,7 @@ import { createLibrarianRoutes } from './librarian.ts';
 import { createNewspaperRoutes } from './newspaper.ts';
 import { createRunRoutes } from './runs.ts';
 import { createScheduleRoutes } from './schedule.ts';
-import { systemRoutes } from './system.ts';
+import { createSystemRoutes } from './system.ts';
 
 export interface AppDeps {
   registry?: AgentRegistry;
@@ -30,7 +30,7 @@ export function createApp(registryOrDeps?: AgentRegistry | AppDeps) {
     return c.json({ error: 'Internal server error' }, 500);
   });
 
-  app.route('/', systemRoutes);
+  app.route('/', createSystemRoutes());
 
   // Support both old signature (registry only) and new signature (deps object)
   let registry: AgentRegistry | undefined;

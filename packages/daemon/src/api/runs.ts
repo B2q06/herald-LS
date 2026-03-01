@@ -43,11 +43,6 @@ export function createRunRoutes(deps: RunRouteDeps) {
   routes.post('/api/agents/:name/run', async (c) => {
     const name = c.req.param('name');
 
-    // Check agent exists
-    if (!deps.registry.has(name)) {
-      return c.json({ error: 'Agent not found' }, 404);
-    }
-
     // Check SDK configured
     if (!deps.sdkConfigured) {
       return c.json({ error: 'SDK not configured' }, 503);
@@ -61,23 +56,28 @@ export function createRunRoutes(deps: RunRouteDeps) {
     const body = await c.req.json().catch(() => ({}));
     const prompt = (body as { prompt?: string }).prompt;
 
-    const runResult = await executeRun(
-      name,
-      agent.config,
-      deps.heraldConfig,
-      deps.sessionManager,
-      deps.registry,
-      prompt,
-      deps.postRunContext,
-    );
+    try {
+      const runResult = await executeRun(
+        name,
+        agent.config,
+        deps.heraldConfig,
+        deps.sessionManager,
+        deps.registry,
+        prompt,
+        deps.postRunContext,
+      );
 
-    return c.json({
-      runId: runResult.runId,
-      result: runResult.result,
-      status: runResult.status,
-      startedAt: runResult.startedAt,
-      finishedAt: runResult.finishedAt,
-    });
+      return c.json({
+        runId: runResult.runId,
+        result: runResult.result,
+        status: runResult.status,
+        startedAt: runResult.startedAt,
+        finishedAt: runResult.finishedAt,
+      });
+    } catch (err) {
+      console.error(`[herald:api] Run failed for agent "${name}":`, (err as Error).message);
+      return c.json({ error: 'Agent run failed' }, 500);
+    }
   });
 
   routes.get('/api/agents/:name/runs', async (c) => {

@@ -37,7 +37,7 @@ describe('newspaper routes', () => {
   });
 
   beforeEach(async () => {
-    tempDir = join(tmpdir(), `herald-newspaper-api-test-${Date.now()}`);
+    tempDir = join(tmpdir(), `herald-newspaper-api-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
     const personasDir = join(tempDir, 'personas');
     const memoryDir = join(tempDir, 'memory');
 
@@ -402,7 +402,7 @@ describe('newspaper routes', () => {
 
       const res = await app.request('/api/newspaper/current/markdown');
       expect(res.status).toBe(200);
-      expect(res.headers.get('Content-Type')).toBe('text/markdown');
+      expect(res.headers.get('Content-Type')).toBe('text/plain');
     });
   });
 
@@ -504,7 +504,7 @@ describe('newspaper routes', () => {
 
       const res = await app.request('/api/newspaper/editions/2026-02-28/markdown');
       expect(res.status).toBe(200);
-      expect(res.headers.get('Content-Type')).toBe('text/markdown');
+      expect(res.headers.get('Content-Type')).toBe('text/plain');
     });
   });
 
@@ -691,7 +691,7 @@ describe('newspaper routes', () => {
 
       expect(res.status).toBe(201);
       const body = await res.json();
-      expect(body.updateId).toMatch(/^update-\d{6}$/);
+      expect(body.updateId).toMatch(/^update-\d{6}-\d{3}$/);
       expect(body.editionDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
       expect(body.updatePath).toBeTruthy();
     });

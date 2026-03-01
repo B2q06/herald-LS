@@ -128,7 +128,7 @@ describe('PatrolCycleManager', () => {
 
     const result = await cycleManager.executeCycle(agents, heraldConfig, sessionManager, registry);
 
-    expect(result.cycleId).toMatch(/^\d{8}-\d{6}$/);
+    expect(result.cycleId).toMatch(/^\d{8}-\d{6}-[a-z0-9]{4}$/);
     expect(result.startedAt).toBeTruthy();
     expect(result.finishedAt).toBeTruthy();
     expect(result.schedule).toBe('30 5,11,17,23 * * *');

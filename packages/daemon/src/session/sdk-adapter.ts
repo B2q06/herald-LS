@@ -70,6 +70,7 @@ export class AgentSdkAdapter implements SdkAdapter {
         permissionMode: 'bypassPermissions',
         allowDangerouslySkipPermissions: true,
         maxTurns: this.options.maxTurns,
+        ...(params.maxTokens ? { maxTokens: params.maxTokens } : {}),
         maxBudgetUsd: this.options.maxBudgetUsd,
         cwd: this.options.cwd,
         model: this.options.model ?? 'claude-sonnet-4-6',

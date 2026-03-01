@@ -9,6 +9,32 @@ import type { PostRunContext } from './run-executor.ts';
 import type { SdkAdapter, SendMessageParams, SendMessageResult } from './sdk-adapter.ts';
 import { SessionManager } from './session-manager.ts';
 
+// Module-scope mocks (hoisted by vitest)
+vi.mock('../librarian/post-run-hook.ts', () => ({
+  processRunOutput: vi.fn().mockResolvedValue(undefined),
+}));
+vi.mock('../librarian/connections-writer.ts', () => ({
+  writeConnections: vi.fn().mockResolvedValue(undefined),
+}));
+vi.mock('../memory/knowledge-manager.ts', () => ({
+  KnowledgeManager: vi.fn().mockImplementation(() => ({
+    syncKnowledge: vi.fn().mockResolvedValue(undefined),
+  })),
+}));
+vi.mock('../newspaper/breaking-update.ts', () => ({
+  processBreakingUpdate: vi.fn().mockResolvedValue({
+    updateId: 'update-120000',
+    updatePath: '/tmp/update.md',
+    editionDate: '2026-02-28',
+    recompiled: true,
+    committed: true,
+  }),
+}));
+vi.mock('../newspaper/featured-story.ts', () => ({
+  parseFeaturedStoriesFromFrontmatter: vi.fn().mockReturnValue(null),
+  processAllFeaturedStories: vi.fn().mockResolvedValue([]),
+}));
+
 class MockSdkAdapter implements SdkAdapter {
   public response: SendMessageResult = {
     text: 'Mock agent patrol report content',
@@ -43,7 +69,7 @@ describe('run-executor', () => {
   });
 
   beforeEach(async () => {
-    tempDir = join(tmpdir(), `herald-executor-test-${Date.now()}`);
+    tempDir = join(tmpdir(), `herald-executor-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
     const personasDir = join(tempDir, 'personas');
     const memoryDir = join(tempDir, 'memory');
 
@@ -81,7 +107,7 @@ describe('run-executor', () => {
   describe('generateRunId', () => {
     it('returns a string in YYYYMMDD-HHmmss format', () => {
       const runId = generateRunId();
-      expect(runId).toMatch(/^\d{8}-\d{6}$/);
+      expect(runId).toMatch(/^\d{8}-\d{6}-[a-z0-9]{4}$/);
     });
   });
 
@@ -98,7 +124,7 @@ describe('run-executor', () => {
 
       expect(result.status).toBe('success');
       expect(result.result).toBe('Mock agent patrol report content');
-      expect(result.runId).toMatch(/^\d{8}-\d{6}$/);
+      expect(result.runId).toMatch(/^\d{8}-\d{6}-[a-z0-9]{4}$/);
       expect(result.startedAt).toBeTruthy();
       expect(result.finishedAt).toBeTruthy();
     });
@@ -258,28 +284,6 @@ describe('run-executor', () => {
     beforeEach(async () => {
       vi.clearAllMocks();
       vi.spyOn(console, 'log').mockImplementation(() => {});
-
-      // Mock all dynamic imports that firePostRunHooks uses
-      vi.mock('../librarian/post-run-hook.ts', () => ({
-        processRunOutput: vi.fn().mockResolvedValue(undefined),
-      }));
-      vi.mock('../librarian/connections-writer.ts', () => ({
-        writeConnections: vi.fn().mockResolvedValue(undefined),
-      }));
-      vi.mock('../memory/knowledge-manager.ts', () => ({
-        KnowledgeManager: vi.fn().mockImplementation(() => ({
-          syncKnowledge: vi.fn().mockResolvedValue(undefined),
-        })),
-      }));
-      vi.mock('../newspaper/breaking-update.ts', () => ({
-        processBreakingUpdate: vi.fn().mockResolvedValue({
-          updateId: 'update-120000',
-          updatePath: '/tmp/update.md',
-          editionDate: '2026-02-28',
-          recompiled: true,
-          committed: true,
-        }),
-      }));
     });
 
     it('detects BREAKING: prefix in report and calls processBreakingUpdate', async () => {
@@ -307,7 +311,7 @@ describe('run-executor', () => {
       );
 
       // Wait for fire-and-forget hooks to complete
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
       const { processBreakingUpdate } = await import(
         '../newspaper/breaking-update.ts'
@@ -346,7 +350,7 @@ describe('run-executor', () => {
       );
 
       // Wait for fire-and-forget hooks to complete
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
       const { processBreakingUpdate } = await import(
         '../newspaper/breaking-update.ts'
@@ -379,7 +383,7 @@ describe('run-executor', () => {
       );
 
       // Wait for fire-and-forget hooks
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
       expect(result.status).toBe('success');
 
@@ -412,31 +416,6 @@ describe('run-executor', () => {
       );
 
       registry.register('newspaper', makeConfig('newspaper'));
-
-      vi.mock('../librarian/post-run-hook.ts', () => ({
-        processRunOutput: vi.fn().mockResolvedValue(undefined),
-      }));
-      vi.mock('../librarian/connections-writer.ts', () => ({
-        writeConnections: vi.fn().mockResolvedValue(undefined),
-      }));
-      vi.mock('../memory/knowledge-manager.ts', () => ({
-        KnowledgeManager: vi.fn().mockImplementation(() => ({
-          syncKnowledge: vi.fn().mockResolvedValue(undefined),
-        })),
-      }));
-      vi.mock('../newspaper/breaking-update.ts', () => ({
-        processBreakingUpdate: vi.fn().mockResolvedValue({
-          updateId: 'update-120000',
-          updatePath: '/tmp/update.md',
-          editionDate: '2026-02-28',
-          recompiled: true,
-          committed: true,
-        }),
-      }));
-      vi.mock('../newspaper/featured-story.ts', () => ({
-        parseFeaturedStoriesFromFrontmatter: vi.fn().mockReturnValue(null),
-        processAllFeaturedStories: vi.fn().mockResolvedValue([]),
-      }));
     });
 
     it('does not trigger featured story processing for non-newspaper agents', async () => {
@@ -468,7 +447,7 @@ describe('run-executor', () => {
       );
 
       // Wait for hooks
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
       const { parseFeaturedStoriesFromFrontmatter } = await import(
         '../newspaper/featured-story.ts'
@@ -520,15 +499,15 @@ describe('run-executor', () => {
       );
 
       // Wait for hooks
-      await new Promise((resolve) => setTimeout(resolve, 200));
-
-      expect(parseFeaturedStoriesFromFrontmatter).toHaveBeenCalled();
-      expect(processAllFeaturedStories).toHaveBeenCalledWith(
-        expect.arrayContaining([
-          expect.objectContaining({ headline: 'Test Story' }),
-        ]),
-        expect.objectContaining({ heraldConfig }),
-      );
+      await vi.waitFor(() => {
+        expect(parseFeaturedStoriesFromFrontmatter).toHaveBeenCalled();
+        expect(processAllFeaturedStories).toHaveBeenCalledWith(
+          expect.arrayContaining([
+            expect.objectContaining({ headline: 'Test Story' }),
+          ]),
+          expect.objectContaining({ heraldConfig }),
+        );
+      }, { timeout: 1000 });
     });
 
     it('does not trigger processing when newspaper has no featured stories', async () => {
@@ -566,10 +545,10 @@ describe('run-executor', () => {
         mockPostRunContext,
       );
 
-      // Wait for hooks
-      await new Promise((resolve) => setTimeout(resolve, 200));
-
-      expect(parseFeaturedStoriesFromFrontmatter).toHaveBeenCalled();
+      // Wait for hooks — use vi.waitFor for the positive assertion, then check negative
+      await vi.waitFor(() => {
+        expect(parseFeaturedStoriesFromFrontmatter).toHaveBeenCalled();
+      }, { timeout: 1000 });
       expect(processAllFeaturedStories).not.toHaveBeenCalled();
     });
   });

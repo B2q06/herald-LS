@@ -36,7 +36,7 @@ describe('breaking-update', () => {
   });
 
   beforeEach(async () => {
-    tempDir = join(tmpdir(), `herald-breaking-test-${Date.now()}`);
+    tempDir = join(tmpdir(), `herald-breaking-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
     await mkdir(tempDir, { recursive: true });
 
     heraldConfig = {
@@ -64,7 +64,7 @@ describe('breaking-update', () => {
       const event = makeBreakingEvent();
       const result = await processBreakingUpdate(event, { heraldConfig });
 
-      expect(result.updateId).toMatch(/^update-\d{6}$/);
+      expect(result.updateId).toMatch(/^update-\d{6}-\d{3}$/);
       expect(result.updatePath).toContain('/updates/');
       expect(result.editionDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 
@@ -89,7 +89,7 @@ describe('breaking-update', () => {
       );
       const files = await readdir(updatesDir);
       expect(files.length).toBe(1);
-      expect(files[0]).toMatch(/^update-\d{6}\.md$/);
+      expect(files[0]).toMatch(/^update-\d{6}-\d{3}\.md$/);
     });
 
     it('creates edition directory if morning synthesis has not run yet', async () => {
