@@ -91,10 +91,11 @@ export async function ensureNewspaperBranch(repoPath: string): Promise<void> {
 export async function commitEdition(
   editionDir: string,
   commitMessage: string,
+  repoPath?: string,
 ): Promise<GitCommitResult> {
   let repoRoot: string;
   try {
-    repoRoot = await getRepoRoot();
+    repoRoot = repoPath ?? await getRepoRoot(editionDir);
   } catch {
     return { success: false, error: 'Not inside a git repository', fallbackPath: editionDir };
   }
@@ -193,10 +194,11 @@ export async function commitEdition(
 export async function commitWeekly(
   weeklyPath: string,
   commitMessage: string,
+  repoPath?: string,
 ): Promise<GitCommitResult> {
   let repoRoot: string;
   try {
-    repoRoot = await getRepoRoot();
+    repoRoot = repoPath ?? await getRepoRoot(weeklyPath);
   } catch {
     return { success: false, error: 'Not inside a git repository', fallbackPath: weeklyPath };
   }

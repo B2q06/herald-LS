@@ -1,8 +1,8 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from 'bun:test';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { HeraldConfig } from '@herald/shared';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CompilerFn } from './pipeline.ts';
 import { getEditionStatus, runNewspaperPipeline } from './pipeline.ts';
 import type { CompilationResult } from './typst-compiler.ts';
@@ -10,7 +10,7 @@ import type { CompilationResult } from './typst-compiler.ts';
 describe('runNewspaperPipeline', () => {
   let tempDir: string;
   let heraldConfig: HeraldConfig;
-  let mockCompiler: ReturnType<typeof mock>;
+  let mockCompiler: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     tempDir = join(
@@ -30,11 +30,11 @@ describe('runNewspaperPipeline', () => {
       log_level: 'info',
     };
 
-    spyOn(console, 'log').mockImplementation(() => {});
-    spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
 
     // Default: compilation succeeds
-    mockCompiler = mock(
+    mockCompiler = vi.fn(
       async (
         _templatePath: string,
         outputPath: string,
@@ -49,7 +49,7 @@ describe('runNewspaperPipeline', () => {
   });
 
   afterEach(async () => {
-    mock.restore();
+    vi.restoreAllMocks();
     await rm(tempDir, { recursive: true, force: true });
   });
 
@@ -188,7 +188,7 @@ describe('runNewspaperPipeline', () => {
     await mkdir(templatesDir, { recursive: true });
     await writeFile(join(templatesDir, 'newspaper.typ'), 'template');
 
-    const failingCompiler = mock(
+    const failingCompiler = vi.fn(
       async (
         _templatePath: string,
         outputPath: string,
@@ -223,7 +223,7 @@ describe('runNewspaperPipeline', () => {
     await mkdir(templatesDir, { recursive: true });
     await writeFile(join(templatesDir, 'newspaper.typ'), 'template');
 
-    const failingCompiler = mock(
+    const failingCompiler = vi.fn(
       async (
         _templatePath: string,
         _outputPath: string,

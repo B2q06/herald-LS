@@ -2,10 +2,9 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    projects: ['packages/*'],
     server: {
       deps: {
-        inline: ['zod'],
+        inline: ['zod', '@herald/shared'],
       },
     },
   },

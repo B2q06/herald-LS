@@ -4,6 +4,9 @@
   "workspaces": {
     "": {
       "name": "herald",
+      "dependencies": {
+        "zod": "^3.25.76",
+      },
       "devDependencies": {
         "@biomejs/biome": "^2.4.4",
         "typescript": "^5",

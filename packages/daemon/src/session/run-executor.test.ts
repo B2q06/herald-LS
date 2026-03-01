@@ -256,6 +256,7 @@ describe('run-executor', () => {
     // We mock the librarian, connections-writer, knowledge-manager, and breaking-update modules
     // so the hooks run without real dependencies.
     beforeEach(async () => {
+      vi.clearAllMocks();
       vi.spyOn(console, 'log').mockImplementation(() => {});
 
       // Mock all dynamic imports that firePostRunHooks uses
@@ -392,6 +393,7 @@ describe('run-executor', () => {
 
   describe('featured story detection in post-run hooks', () => {
     beforeEach(async () => {
+      vi.clearAllMocks();
       vi.spyOn(console, 'log').mockImplementation(() => {});
 
       // Set up newspaper agent in registry

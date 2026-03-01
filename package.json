@@ -4,7 +4,7 @@
   "type": "module",
   "workspaces": ["packages/*"],
   "scripts": {
-    "test": "vitest run",
+    "test": "bun --bun vitest run",
     "lint": "biome check .",
     "format": "biome format --write .",
     "dev:daemon": "bun run --filter @herald/daemon dev",
@@ -15,5 +15,8 @@
     "@biomejs/biome": "^2.4.4",
     "typescript": "^5",
     "vitest": "^4.0.18"
+  },
+  "dependencies": {
+    "zod": "^3.25.76"
   }
 }

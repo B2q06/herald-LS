@@ -81,10 +81,6 @@ describe('git-versioner', () => {
 
   describe('commitEdition', () => {
     it('commits edition files to the newspaper branch', async () => {
-      // Mock getRepoRoot to return our tempDir
-      const gitVersioner = await import('./git-versioner.ts');
-      vi.spyOn(gitVersioner, 'getRepoRoot').mockResolvedValue(tempDir);
-
       // Create an edition directory
       const editionDir = join(tempDir, 'newspaper', 'editions', '2026-02-28');
       await mkdir(join(editionDir, 'sources'), { recursive: true });
@@ -94,7 +90,7 @@ describe('git-versioner', () => {
       );
       await writeFile(join(editionDir, 'sources', 'ml-researcher.md'), '# ML Report');
 
-      const result = await commitEdition(editionDir, 'Daily edition: AI breakthroughs');
+      const result = await commitEdition(editionDir, 'Daily edition: AI breakthroughs', tempDir);
 
       expect(result.success).toBe(true);
       expect(result.commitHash).toBeDefined();
@@ -106,25 +102,19 @@ describe('git-versioner', () => {
     });
 
     it('switches back to original branch after commit', async () => {
-      const gitVersioner = await import('./git-versioner.ts');
-      vi.spyOn(gitVersioner, 'getRepoRoot').mockResolvedValue(tempDir);
-
       const { stdout: originalBranch } = await runGit(['branch', '--show-current'], tempDir);
 
       const editionDir = join(tempDir, 'newspaper', 'editions', '2026-02-28');
       await mkdir(join(editionDir, 'sources'), { recursive: true });
       await writeFile(join(editionDir, 'sources', 'editorial.md'), '# Test');
 
-      await commitEdition(editionDir, 'Test commit');
+      await commitEdition(editionDir, 'Test commit', tempDir);
 
       const { stdout: currentBranch } = await runGit(['branch', '--show-current'], tempDir);
       expect(currentBranch).toBe(originalBranch);
     });
 
     it('handles stashing and restoring uncommitted work', async () => {
-      const gitVersioner = await import('./git-versioner.ts');
-      vi.spyOn(gitVersioner, 'getRepoRoot').mockResolvedValue(tempDir);
-
       // Create uncommitted work
       await writeFile(join(tempDir, 'dirty-file.txt'), 'uncommitted changes');
       await runGit(['add', 'dirty-file.txt'], tempDir);
@@ -133,7 +123,7 @@ describe('git-versioner', () => {
       await mkdir(join(editionDir, 'sources'), { recursive: true });
       await writeFile(join(editionDir, 'sources', 'editorial.md'), '# Test');
 
-      const result = await commitEdition(editionDir, 'Test with dirty state');
+      const result = await commitEdition(editionDir, 'Test with dirty state', tempDir);
 
       expect(result.success).toBe(true);
 
@@ -143,9 +133,7 @@ describe('git-versioner', () => {
     });
 
     it('returns fallbackPath on git failure', async () => {
-      const gitVersioner = await import('./git-versioner.ts');
-      vi.spyOn(gitVersioner, 'getRepoRoot').mockRejectedValue(new Error('Not a git repo'));
-
+      // Pass a non-existent path as repoPath — getRepoRoot will fail
       const result = await commitEdition('/fake/edition/2026-02-28', 'Test');
 
       expect(result.success).toBe(false);
@@ -154,18 +142,15 @@ describe('git-versioner', () => {
     });
 
     it('handles no changes to commit gracefully', async () => {
-      const gitVersioner = await import('./git-versioner.ts');
-      vi.spyOn(gitVersioner, 'getRepoRoot').mockResolvedValue(tempDir);
-
       const editionDir = join(tempDir, 'newspaper', 'editions', '2026-02-28');
       await mkdir(join(editionDir, 'sources'), { recursive: true });
       await writeFile(join(editionDir, 'sources', 'editorial.md'), '# Test');
 
       // First commit
-      await commitEdition(editionDir, 'First commit');
+      await commitEdition(editionDir, 'First commit', tempDir);
 
       // Second commit with same content — should handle gracefully
-      const result = await commitEdition(editionDir, 'Duplicate commit');
+      const result = await commitEdition(editionDir, 'Duplicate commit', tempDir);
 
       // Should succeed (no error) but may not have a new commitHash
       expect(result.success).toBe(true);
@@ -174,16 +159,13 @@ describe('git-versioner', () => {
 
   describe('commitWeekly', () => {
     it('commits a weekly file to the newspaper branch', async () => {
-      const gitVersioner = await import('./git-versioner.ts');
-      vi.spyOn(gitVersioner, 'getRepoRoot').mockResolvedValue(tempDir);
-
       // Create a weekly file
       const weeklyDir = join(tempDir, 'newspaper', 'weekly');
       await mkdir(weeklyDir, { recursive: true });
       const weeklyPath = join(weeklyDir, '2026-02-28-weekly.md');
       await writeFile(weeklyPath, '# Weekly Synthesis\n\nStrategic trends...');
 
-      const result = await commitWeekly(weeklyPath, 'Weekly synthesis: 2026-02-28');
+      const result = await commitWeekly(weeklyPath, 'Weekly synthesis: 2026-02-28', tempDir);
 
       expect(result.success).toBe(true);
       expect(result.commitHash).toBeDefined();
@@ -194,9 +176,7 @@ describe('git-versioner', () => {
     });
 
     it('returns fallbackPath when not in a git repo', async () => {
-      const gitVersioner = await import('./git-versioner.ts');
-      vi.spyOn(gitVersioner, 'getRepoRoot').mockRejectedValue(new Error('Not a git repo'));
-
+      // Pass a non-existent path — getRepoRoot will fail
       const result = await commitWeekly('/fake/weekly/2026-02-28-weekly.md', 'Test');
 
       expect(result.success).toBe(false);
@@ -211,14 +191,11 @@ describe('git-versioner', () => {
     });
 
     it('returns commit log entries from newspaper branch', async () => {
-      const gitVersioner = await import('./git-versioner.ts');
-      vi.spyOn(gitVersioner, 'getRepoRoot').mockResolvedValue(tempDir);
-
       // Create and commit an edition
       const editionDir = join(tempDir, 'newspaper', 'editions', '2026-02-28');
       await mkdir(join(editionDir, 'sources'), { recursive: true });
       await writeFile(join(editionDir, 'sources', 'editorial.md'), '# Test');
-      await commitEdition(editionDir, 'Daily: AI advances in Q1');
+      await commitEdition(editionDir, 'Daily: AI advances in Q1', tempDir);
 
       const log = await getEditionLog(tempDir);
 
@@ -232,9 +209,6 @@ describe('git-versioner', () => {
 
   describe('getEditionContent', () => {
     it('retrieves file content from the newspaper branch without checkout', async () => {
-      const gitVersioner = await import('./git-versioner.ts');
-      vi.spyOn(gitVersioner, 'getRepoRoot').mockResolvedValue(tempDir);
-
       // Commit an edition
       const editionDir = join(tempDir, 'newspaper', 'editions', '2026-02-28');
       await mkdir(join(editionDir, 'sources'), { recursive: true });
@@ -242,7 +216,7 @@ describe('git-versioner', () => {
         join(editionDir, 'sources', 'editorial.md'),
         '# Herald Daily Edition\n\nContent here',
       );
-      await commitEdition(editionDir, 'Test edition');
+      await commitEdition(editionDir, 'Test edition', tempDir);
 
       const result = await getEditionContent(tempDir, '2026-02-28', 'sources/editorial.md');
 
@@ -268,15 +242,12 @@ describe('git-versioner', () => {
     });
 
     it('lists edition dates from git', async () => {
-      const gitVersioner = await import('./git-versioner.ts');
-      vi.spyOn(gitVersioner, 'getRepoRoot').mockResolvedValue(tempDir);
-
       // Commit two editions
       for (const date of ['2026-02-27', '2026-02-28']) {
         const editionDir = join(tempDir, 'newspaper', 'editions', date);
         await mkdir(join(editionDir, 'sources'), { recursive: true });
         await writeFile(join(editionDir, 'sources', 'editorial.md'), `# Edition ${date}`);
-        await commitEdition(editionDir, `Edition ${date}`);
+        await commitEdition(editionDir, `Edition ${date}`, tempDir);
       }
 
       const editions = await listEditionsFromGit(tempDir);

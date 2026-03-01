@@ -1,18 +1,18 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from 'bun:test';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SpawnResult } from './typst-compiler.ts';
 import { compileTypst } from './typst-compiler.ts';
 
 describe('compileTypst', () => {
-  let mockSpawn: ReturnType<typeof mock>;
+  let mockSpawn: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    mockSpawn = mock();
-    spyOn(console, 'log').mockImplementation(() => {});
-    spyOn(console, 'error').mockImplementation(() => {});
+    mockSpawn = vi.fn();
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    mock.restore();
+    vi.restoreAllMocks();
   });
 
   it('returns successful result when typst exits with code 0', async () => {

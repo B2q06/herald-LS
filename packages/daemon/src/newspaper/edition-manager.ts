@@ -53,7 +53,7 @@ export async function listEditions(newspaperDir: string): Promise<EditionSummary
   // Try git first for commit info
   let repoRoot: string | undefined;
   try {
-    repoRoot = await getRepoRoot();
+    repoRoot = await getRepoRoot(newspaperDir);
   } catch {
     // Not in a git repo — filesystem only
   }
@@ -131,7 +131,7 @@ export async function getEdition(
   // Try git first
   let repoRoot: string | undefined;
   try {
-    repoRoot = await getRepoRoot();
+    repoRoot = await getRepoRoot(newspaperDir);
   } catch {
     // Fall through to filesystem
   }
@@ -163,7 +163,7 @@ export async function listWeeklies(newspaperDir: string): Promise<WeeklySummary[
   // Git data
   let repoRoot: string | undefined;
   try {
-    repoRoot = await getRepoRoot();
+    repoRoot = await getRepoRoot(newspaperDir);
   } catch {
     // Not in git repo
   }
@@ -220,7 +220,7 @@ export async function getWeekly(
   // Try git first
   let repoRoot: string | undefined;
   try {
-    repoRoot = await getRepoRoot();
+    repoRoot = await getRepoRoot(newspaperDir);
   } catch {
     // Fall through
   }

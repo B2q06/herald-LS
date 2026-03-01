@@ -1,10 +1,21 @@
+import { access } from 'node:fs/promises';
 import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parseKnowledgeMd } from './knowledge-parser.ts';
 
+const FIXTURE_PATH = join(process.cwd(), 'memory/agents/ml-researcher/knowledge.md');
+
 describe('parseKnowledgeMd', () => {
   it('parses real ml-researcher knowledge.md fixture', async () => {
-    const content = await readFile('/home/b/herald/memory/agents/ml-researcher/knowledge.md', 'utf-8');
+    try {
+      await access(FIXTURE_PATH);
+    } catch {
+      // Fixture not available in this environment — skip
+      return;
+    }
+
+    const content = await readFile(FIXTURE_PATH, 'utf-8');
     const items = parseKnowledgeMd(content);
 
     // Should produce items from all ## sections that contain ### entries
