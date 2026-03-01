@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import type { HeraldConfig } from '@herald/shared';
 import { Hono } from 'hono';
 import type { AgentRegistry } from '../agent-loader/agent-registry.ts';
+import type { PostRunContext } from '../session/run-executor.ts';
 import { executeRun } from '../session/run-executor.ts';
 import type { SessionManager } from '../session/session-manager.ts';
 
@@ -11,6 +12,7 @@ export interface RunRouteDeps {
   sessionManager: SessionManager;
   heraldConfig: HeraldConfig;
   sdkConfigured: boolean;
+  postRunContext?: PostRunContext;
 }
 
 function parseFrontmatter(content: string): Record<string, string> | null {
@@ -66,6 +68,7 @@ export function createRunRoutes(deps: RunRouteDeps) {
       deps.sessionManager,
       deps.registry,
       prompt,
+      deps.postRunContext,
     );
 
     return c.json({

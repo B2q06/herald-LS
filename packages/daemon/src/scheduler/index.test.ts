@@ -52,8 +52,10 @@ describe('initScheduler', () => {
     const result = initScheduler(agentRegistry, sessionManager, heraldConfig);
 
     const schedules = result.getAll();
-    expect(schedules).toHaveLength(1);
-    expect(schedules[0]).toEqual({
+    // +1 for the always-present newspaper-weekly cron
+    const agentSchedules = schedules.filter((s) => s.agentName === 'scheduled-agent');
+    expect(agentSchedules).toHaveLength(1);
+    expect(agentSchedules[0]).toEqual({
       agentName: 'scheduled-agent',
       cronExpression: '0 5 * * *',
     });
@@ -65,7 +67,9 @@ describe('initScheduler', () => {
 
     const result = initScheduler(agentRegistry, sessionManager, heraldConfig);
 
-    expect(result.getAll()).toHaveLength(0);
+    // Only the newspaper-weekly cron should be present
+    const agentSchedules = result.getAll().filter((s) => s.agentName !== 'newspaper-weekly');
+    expect(agentSchedules).toHaveLength(0);
     result.stop();
   });
 
@@ -77,8 +81,9 @@ describe('initScheduler', () => {
     const result = initScheduler(agentRegistry, sessionManager, heraldConfig);
 
     const schedules = result.getAll();
-    expect(schedules).toHaveLength(2);
-    expect(schedules).toEqual(
+    const agentSchedules = schedules.filter((s) => s.agentName !== 'newspaper-weekly');
+    expect(agentSchedules).toHaveLength(2);
+    expect(agentSchedules).toEqual(
       expect.arrayContaining([
         { agentName: 'agent-a', cronExpression: '0 5 * * *' },
         { agentName: 'agent-b', cronExpression: '0 10 * * *' },
@@ -89,7 +94,54 @@ describe('initScheduler', () => {
 
   it('handles empty agent registry', () => {
     const result = initScheduler(agentRegistry, sessionManager, heraldConfig);
-    expect(result.getAll()).toHaveLength(0);
+    // Only the newspaper-weekly cron should be present
+    const agentSchedules = result.getAll().filter((s) => s.agentName !== 'newspaper-weekly');
+    expect(agentSchedules).toHaveLength(0);
+    result.stop();
+  });
+
+  it('registers newspaper agent separately from patrol agents', () => {
+    agentRegistry.register('ml-researcher', makeConfig('ml-researcher', '0 5 * * *'));
+    agentRegistry.register('newspaper', {
+      ...makeConfig('newspaper', '0 6 * * *'),
+      name: 'newspaper',
+    });
+
+    const result = initScheduler(agentRegistry, sessionManager, heraldConfig);
+
+    const schedules = result.getAll();
+    // ml-researcher + newspaper daily + newspaper-weekly = 3
+    expect(schedules).toHaveLength(3);
+    // Newspaper gets a special name prefix
+    const newspaperSchedule = schedules.find((s) => s.agentName.startsWith('newspaper:'));
+    expect(newspaperSchedule).toBeDefined();
+    expect(newspaperSchedule?.cronExpression).toBe('0 6 * * *');
+    result.stop();
+  });
+
+  it('newspaper agent uses executeNewspaperRun callback (not executeRun)', () => {
+    agentRegistry.register('newspaper', {
+      ...makeConfig('newspaper', '0 6 * * *'),
+      name: 'newspaper',
+    });
+
+    const result = initScheduler(agentRegistry, sessionManager, heraldConfig);
+
+    const schedules = result.getAll();
+    // newspaper daily + newspaper-weekly = 2
+    expect(schedules).toHaveLength(2);
+    const newspaperSchedules = schedules.filter((s) => s.agentName.includes('newspaper'));
+    expect(newspaperSchedules).toHaveLength(2);
+    result.stop();
+  });
+
+  it('always registers newspaper-weekly cron for Friday 5 PM', () => {
+    const result = initScheduler(agentRegistry, sessionManager, heraldConfig);
+
+    const schedules = result.getAll();
+    const weeklySchedule = schedules.find((s) => s.agentName === 'newspaper-weekly');
+    expect(weeklySchedule).toBeDefined();
+    expect(weeklySchedule?.cronExpression).toBe('0 17 * * 5');
     result.stop();
   });
 });

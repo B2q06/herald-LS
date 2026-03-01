@@ -1,0 +1,13 @@
+name: ml-researcher
+persona: ml-researcher.md
+schedule: "30 5,11,17,23 * * *"
+output_dir: reports/ml-researcher
+session_limit: 15
+notify_policy: failures
+team_eligible: true
+discovery_mode: aggressive
+memory_paths:
+  knowledge: memory/agents/ml-researcher/knowledge.md
+  preferences: memory/agents/ml-researcher/preferences.md
+  last_jobs: memory/agents/ml-researcher/last-jobs.md
+  rag: memory/agents/ml-researcher/rag

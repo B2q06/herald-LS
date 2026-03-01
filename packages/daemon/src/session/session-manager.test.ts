@@ -89,12 +89,13 @@ describe('SessionManager', () => {
       expect(mockAdapter.calls[0].messages[0].content).toBe('Hello agent');
     });
 
-    it('uses default prompt when none provided', async () => {
+    it('uses default patrol prompt when none provided', async () => {
       await manager.runAgent('test-agent', makeConfig('test-agent'), makeHeraldConfig());
 
-      expect(mockAdapter.calls[0].messages[0].content).toContain(
-        'Begin your patrol duties as test-agent',
-      );
+      const prompt = mockAdapter.calls[0].messages[0].content;
+      expect(prompt).toContain('Execute your patrol workflow');
+      expect(prompt).toContain('Current date:');
+      expect(prompt).toContain('This is a bounded patrol session');
     });
 
     it('includes persona in system prompt', async () => {

@@ -4,6 +4,7 @@ import type { AgentRegistry } from '../agent-loader/agent-registry.ts';
 import type { ScheduleRegistry } from '../scheduler/schedule-registry.ts';
 import type { SessionManager } from '../session/session-manager.ts';
 import { createAgentRoutes } from './agents.ts';
+import { createNewspaperRoutes } from './newspaper.ts';
 import { createRunRoutes } from './runs.ts';
 import { createScheduleRoutes } from './schedule.ts';
 import { systemRoutes } from './system.ts';
@@ -53,6 +54,18 @@ export function createApp(registryOrDeps?: AgentRegistry | AppDeps) {
     app.route(
       '/',
       createRunRoutes({
+        registry,
+        sessionManager,
+        heraldConfig,
+        sdkConfigured,
+      }),
+    );
+  }
+
+  if (registry && sessionManager && heraldConfig) {
+    app.route(
+      '/',
+      createNewspaperRoutes({
         registry,
         sessionManager,
         heraldConfig,

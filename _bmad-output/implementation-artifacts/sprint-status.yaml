@@ -1,0 +1,133 @@
+# generated: 2026-02-28
+# project: herald
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2026-02-28
+project: herald
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+
+development_status:
+  # Epic 1: Project Foundation & First Agent Run
+  epic-1: done
+  1-1-bun-workspaces-monorepo-scaffold: done
+  1-2-daemon-skeleton-hono-rest-api: done
+  1-3-agent-definition-loader-auto-discovery: done
+  1-4-claude-sdk-session-manager: done
+  1-5-agent-run-execution-output: done
+  1-6-cron-scheduler-automated-runs: done
+  epic-1-retrospective: optional
+
+  # Epic 2: Automated Research Patrols
+  epic-2: done
+  2-1-research-agent-persona-patrol-workflow: done
+  2-2-opinion-prediction-framework: done
+  2-3-parallel-patrol-execution: done
+  2-4-full-research-agent-roster: done
+  epic-2-retrospective: optional
+
+  # Epic 3: Agent Memory & Knowledge Discovery
+  epic-3: backlog
+  3-1-persistent-knowledge-hot-memory-depreciation: backlog
+  3-2-sqlite-data-layer-per-agent-rag-vector-stores: backlog
+  3-3-memory-librarian-shared-fts5-index: backlog
+  3-4-cross-agent-knowledge-querying: backlog
+  epic-3-retrospective: optional
+
+  # Epic 4: The Morning Newspaper
+  epic-4: in-progress
+  4-1-newspaper-agent-persona-team-synthesis: ready-for-dev
+  4-2-typst-compilation-pipeline: ready-for-dev
+  4-3-git-versioning-edition-management: ready-for-dev
+  4-4-breaking-updates-featured-stories: ready-for-dev
+  epic-4-retrospective: optional
+
+  # Epic 5: CLI — The Operator's Dashboard
+  epic-5: backlog
+  5-1-cli-scaffold-basic-commands: backlog
+  5-2-tui-dashboard-scaffold-main-panels: backlog
+  5-3-agent-drill-in-view: backlog
+  5-4-scheduling-tab: backlog
+  5-5-real-time-dashboard-updates: backlog
+  5-6-newspaper-report-cli-commands: backlog
+  5-7-agent-chat-log-browser: backlog
+  5-8-shell-completions-scripting: backlog
+  epic-5-retrospective: optional
+
+  # Epic 6: Event-Driven Automation & Inter-Agent Communication
+  epic-6: backlog
+  6-1-file-trigger-engine: backlog
+  6-2-autonomous-inter-agent-communication: backlog
+  6-3-failure-mode-distinction-recovery: backlog
+  epic-6-retrospective: optional
+
+  # Epic 7: Smart Task Management
+  epic-7: backlog
+  7-1-daily-todo-ledger-accountability-tracking: backlog
+  7-2-smart-todo-agent-calendar-aware-task-generation: backlog
+  7-3-interactive-task-management: backlog
+  7-4-midday-check-ins-dynamic-adjustment: backlog
+  epic-7-retrospective: optional
+
+  # Epic 8: Real-Time Push & Notifications
+  epic-8: backlog
+  8-1-websocket-server-real-time-event-push: backlog
+  8-2-notification-system-urgency-gating: backlog
+  8-3-multi-adapter-notification-delivery-failure-alerts: backlog
+  epic-8-retrospective: optional
+
+  # Epic 9: Communications & Inbox Integration
+  epic-9: backlog
+  9-1-comms-agent-persona-inbox-monitoring: backlog
+  9-2-urgency-evaluation-draft-responses: backlog
+  9-3-inbox-aware-task-prioritization: backlog
+  epic-9-retrospective: optional
+
+  # Epic 10: The Orchestrator & Project Portal
+  epic-10: backlog
+  10-1-orchestrator-agent-persona-command-routing: backlog
+  10-2-natural-language-agent-creation: backlog
+  10-3-project-portal-bmad-project-onboarding: backlog
+  10-4-brainstorming-idea-promotion: backlog
+  10-5-orchestrator-dashboard-pane: backlog
+  epic-10-retrospective: optional
+
+  # Epic 11: Mobile Experience (PWA)
+  epic-11: backlog
+  11-1-pwa-scaffold-app-shell: backlog
+  11-2-newspaper-todo-mobile-views: backlog
+  11-3-agent-cards-chat-project-views: backlog
+  11-4-offline-caching-push-notifications: backlog
+  epic-11-retrospective: optional

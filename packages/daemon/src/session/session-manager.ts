@@ -1,5 +1,6 @@
 import { join } from 'node:path';
 import type { AgentConfig, HeraldConfig } from '@herald/shared';
+import type { MemoryLibrarian } from '../librarian/ask-librarian.ts';
 import { loadPersonaContext } from './persona-loader.ts';
 import type { SdkAdapter } from './sdk-adapter.ts';
 
@@ -16,9 +17,14 @@ export interface SessionState {
 export class SessionManager {
   private sessions = new Map<string, SessionState>();
   private sdkAdapter: SdkAdapter;
+  private librarian?: MemoryLibrarian;
 
   constructor(sdkAdapter: SdkAdapter) {
     this.sdkAdapter = sdkAdapter;
+  }
+
+  setLibrarian(librarian: MemoryLibrarian): void {
+    this.librarian = librarian;
   }
 
   async runAgent(
@@ -47,11 +53,26 @@ export class SessionManager {
     session.lastError = undefined;
 
     try {
-      // Load persona context
-      const personaContext = await loadPersonaContext(config, heraldConfig);
+      // Load persona context (with optional cross-agent intelligence)
+      const personaContext = await loadPersonaContext(config, heraldConfig, this.librarian);
 
       // Build user message with optional previous state context
-      const userMessage = prompt ?? `Begin your patrol duties as ${agentName}.`;
+      const now = new Date();
+      const defaultPrompt = `Current date: ${now.toISOString().split('T')[0]}
+Current time: ${now.toISOString().split('T')[1].slice(0, 5)} UTC
+
+Execute your patrol workflow as defined in your persona. Follow your Source Strategy in order, apply your Taste Profile to evaluate findings.
+
+IMPORTANT — Your final text response MUST be the complete patrol report following your persona's Report Format. Do NOT summarize what you did or describe your process. The text you return IS the deliverable. Output the full markdown report with all sections: Headlines, Featured Deep-Dive, Key Findings, Radar, Tangents & Discoveries, Recommendations, Opinions Formed, and Predictions. Do not include YAML frontmatter — that is added automatically.
+
+During your patrol, also update your knowledge base file at: ${personaContext.knowledgePath}
+- Form or update opinions based on this patrol's findings
+- Record any predictions with confidence and timeframe
+- Update your Domain Knowledge section with key learnings
+
+This is a bounded patrol session. Complete your full patrol cycle. Your text output = the report.`;
+
+      const userMessage = prompt ?? defaultPrompt;
       let fullUserMessage = userMessage;
 
       if (session.interactionCount === 0 && personaContext.previousState) {
@@ -66,6 +87,7 @@ export class SessionManager {
         systemPrompt: personaContext.systemPrompt,
         messages: [...session.messages],
         maxTokens: 4096,
+        logLabel: agentName,
       });
 
       // Add assistant response to history

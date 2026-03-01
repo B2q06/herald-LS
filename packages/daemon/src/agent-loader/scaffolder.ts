@@ -3,15 +3,44 @@ import { join } from 'node:path';
 import type { AgentConfig } from '@herald/shared';
 
 function knowledgeTemplate(agentName: string): string {
-  return `# ${agentName} Knowledge
+  return `# ${agentName} — Knowledge Base
 
 ## Domain Knowledge
+<!-- Accumulated domain expertise from patrol runs. Updated by the agent. -->
 
 ## Developing Opinions
+<!-- Opinions with confidence levels, evidence, and timestamps. -->
+<!-- Format:
+### {Opinion Statement}
+- **Confidence:** {0-100}
+- **Evidence:** {supporting observations and citations}
+- **First Stated:** {date}
+- **Last Updated:** {date}
+- **Status:** active | revised | archived
+-->
 
 ## Predictions Log
+<!-- Forward-looking predictions with accountability tracking. -->
+<!-- Format:
+### {Prediction Statement}
+- **Confidence:** {0-100}
+- **Evidence:** {supporting observations}
+- **Stated:** {date}
+- **Timeframe:** {expected by when}
+- **Status:** active | confirmed | invalidated | expired
+- **Outcome:** {filled in when resolved}
+-->
 
 ## Accountability
+<!-- Calibration tracking: how accurate are this agent's predictions? -->
+
+### Calibration Record
+| Confidence Range | Predictions Made | Confirmed | Invalidated | Accuracy |
+|-----------------|-----------------|-----------|-------------|----------|
+| 80-100          | 0               | 0         | 0           | —        |
+| 60-79           | 0               | 0         | 0           | —        |
+| 40-59           | 0               | 0         | 0           | —        |
+| 20-39           | 0               | 0         | 0           | —        |
 `;
 }
 

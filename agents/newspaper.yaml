@@ -1,0 +1,13 @@
+name: newspaper
+persona: newspaper.md
+schedule: "0 6 * * *"
+output_dir: reports/newspaper
+session_limit: 5
+notify_policy: all
+team_eligible: false
+discovery_mode: conservative
+memory_paths:
+  knowledge: memory/agents/newspaper/knowledge.md
+  preferences: memory/agents/newspaper/preferences.md
+  last_jobs: memory/agents/newspaper/last-jobs.md
+  rag: memory/agents/newspaper/rag

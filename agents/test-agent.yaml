@@ -1,0 +1,6 @@
+name: test-agent
+persona: test-agent.md
+output_dir: reports/test-agent
+session_limit: 10
+notify_policy: failures
+team_eligible: false

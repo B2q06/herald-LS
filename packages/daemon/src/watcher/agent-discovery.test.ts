@@ -110,6 +110,6 @@ notify_policy: failures
     expect(await knowledgeFile.exists()).toBe(true);
 
     const content = await knowledgeFile.text();
-    expect(content).toContain('# test-agent Knowledge');
+    expect(content).toContain('# test-agent — Knowledge Base');
   });
 });

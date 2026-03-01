@@ -25,6 +25,7 @@ export const AgentConfigSchema = z.object({
     )
     .optional(),
   team_eligible: z.boolean().default(false),
+  discovery_mode: z.enum(['aggressive', 'moderate', 'conservative']).default('moderate'),
 });
 
 export type AgentConfig = z.infer<typeof AgentConfigSchema>;

@@ -56,11 +56,12 @@ describe('scaffoldAgentDirs', () => {
     const knowledgePath = join(memoryDir, 'agents', 'test-agent', 'knowledge.md');
     const content = await Bun.file(knowledgePath).text();
 
-    expect(content).toContain('# test-agent Knowledge');
+    expect(content).toContain('# test-agent — Knowledge Base');
     expect(content).toContain('## Domain Knowledge');
     expect(content).toContain('## Developing Opinions');
     expect(content).toContain('## Predictions Log');
     expect(content).toContain('## Accountability');
+    expect(content).toContain('Calibration Record');
   });
 
   it('creates empty preferences.md and last-jobs.md', async () => {
