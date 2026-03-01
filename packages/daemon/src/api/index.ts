@@ -1,9 +1,12 @@
 import type { HeraldConfig } from '@herald/shared';
 import { Hono } from 'hono';
 import type { AgentRegistry } from '../agent-loader/agent-registry.ts';
+import type { MemoryLibrarian } from '../librarian/ask-librarian.ts';
 import type { ScheduleRegistry } from '../scheduler/schedule-registry.ts';
+import type { PostRunContext } from '../session/run-executor.ts';
 import type { SessionManager } from '../session/session-manager.ts';
 import { createAgentRoutes } from './agents.ts';
+import { createLibrarianRoutes } from './librarian.ts';
 import { createNewspaperRoutes } from './newspaper.ts';
 import { createRunRoutes } from './runs.ts';
 import { createScheduleRoutes } from './schedule.ts';
@@ -15,6 +18,8 @@ export interface AppDeps {
   heraldConfig?: HeraldConfig;
   sdkConfigured?: boolean;
   scheduleRegistry?: ScheduleRegistry;
+  librarian?: MemoryLibrarian;
+  postRunContext?: PostRunContext;
 }
 
 export function createApp(registryOrDeps?: AgentRegistry | AppDeps) {
@@ -33,6 +38,8 @@ export function createApp(registryOrDeps?: AgentRegistry | AppDeps) {
   let heraldConfig: AppDeps['heraldConfig'];
   let sdkConfigured = false;
   let scheduleRegistry: ScheduleRegistry | undefined;
+  let librarian: MemoryLibrarian | undefined;
+  let postRunContext: PostRunContext | undefined;
 
   if (registryOrDeps && 'has' in registryOrDeps) {
     // Old-style: just a registry
@@ -44,6 +51,8 @@ export function createApp(registryOrDeps?: AgentRegistry | AppDeps) {
     heraldConfig = registryOrDeps.heraldConfig;
     sdkConfigured = registryOrDeps.sdkConfigured ?? false;
     scheduleRegistry = registryOrDeps.scheduleRegistry;
+    librarian = registryOrDeps.librarian;
+    postRunContext = registryOrDeps.postRunContext;
   }
 
   if (registry) {
@@ -58,6 +67,7 @@ export function createApp(registryOrDeps?: AgentRegistry | AppDeps) {
         sessionManager,
         heraldConfig,
         sdkConfigured,
+        postRunContext,
       }),
     );
   }
@@ -76,6 +86,10 @@ export function createApp(registryOrDeps?: AgentRegistry | AppDeps) {
 
   if (scheduleRegistry) {
     app.route('/', createScheduleRoutes(scheduleRegistry));
+  }
+
+  if (librarian) {
+    app.route('/', createLibrarianRoutes(librarian));
   }
 
   return app;
