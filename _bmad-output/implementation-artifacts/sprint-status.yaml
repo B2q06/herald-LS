@@ -31,32 +31,16 @@
 #   - Story 1.1 scaffold only (777 files)
 #   - Base branch for PRs
 #
-# fix/swap-sdk-to-claude-code-js (commit 997c59a, current branch)
-#   - Includes: Epic 1 (all stories committed), SDK swap, Epic 4 (4.1-4.4)
-#   - Also: Epic 2 artifacts (agent YAMLs, personas, story specs)
-#   - Also: Shared types (newspaper.ts, memory.ts), breaking-event/featured-story schemas
-#   - NOTE: daemon/src/index.ts and run-executor.ts import Epic 3 modules
-#     (db/, embedding/, librarian/, memory/) that DO NOT EXIST on this branch.
-#     These imports will break until Epic 3 code is merged in.
-#   - Test state: 290 pass, 4 fail (4.4 API route tests WIP)
-#   - 1 commit ahead of origin (not pushed)
-#
-# newspaper (orphan branch, commit 8ef150a)
-#   - Contains ALL prior session work (5552 files) including:
-#     * Epic 3 code: db/, embedding/, librarian/, memory/, migrations/
-#     * patrol-cycle.ts (Epic 2 scheduler integration)
-#     * config/discovery-modes.md
-#     * api/librarian.ts + test
-#     * __tests__/memory-e2e.test.ts, patrol-integration.test.ts
-#     * Agent memory files (knowledge.md, last-jobs.md, preferences.md)
-#     * Newspaper editions, reports, transcripts (runtime data)
-#   - This is the SOURCE for Epic 3 when we build it
-#   - NOT pushed to origin
+# consolidate/epic-4-complete (current branch, PR to main)
+#   - Consolidated from fix/swap-sdk-to-claude-code-js + newspaper orphan
+#   - Includes: Epic 1 (all stories), Epic 2 (agent configs + personas),
+#     Epic 3 (db, embedding, librarian, memory), Epic 4 (all 4 stories)
+#   - Uses Claude Code SDK (@anthropic-ai/claude-agent-sdk)
+#   - Test state: 43 suites, 462 tests — ALL passing
 #
 # story/1.2 through story/1.6 (individual feature branches)
-#   - All properly committed and merged into fix/swap branch
-#   - All pushed to origin
-#   - Can be cleaned up after fix/swap merges to main
+#   - All properly committed and merged
+#   - Can be cleaned up after consolidate branch merges to main
 # ============================================================
 
 generated: 2026-02-28
@@ -67,7 +51,7 @@ story_location: _bmad-output/implementation-artifacts
 
 development_status:
   # Epic 1: Project Foundation & First Agent Run
-  # Branch: fix/swap-sdk-to-claude-code-js (committed)
+  # Branch: consolidate/epic-4-complete
   epic-1: done
   1-1-bun-workspaces-monorepo-scaffold: done
   1-2-daemon-skeleton-hono-rest-api: done
@@ -78,12 +62,7 @@ development_status:
   epic-1-retrospective: optional
 
   # Epic 2: Automated Research Patrols
-  # Branch: fix/swap-sdk-to-claude-code-js (agent YAMLs, personas, story specs committed)
-  # Branch: newspaper orphan (patrol-cycle.ts, runtime data)
-  # Note: Agent definitions and personas exist. Patrol cycle scheduler integration
-  # exists only on newspaper branch. Core patrol execution uses the standard
-  # run-executor pipeline from Epic 1 — no separate patrol code needed beyond
-  # agent configs + personas + scheduler (which is Epic 1's cron).
+  # Branch: consolidate/epic-4-complete
   epic-2: done
   2-1-research-agent-persona-patrol-workflow: done
   2-2-opinion-prediction-framework: done
@@ -92,35 +71,21 @@ development_status:
   epic-2-retrospective: optional
 
   # Epic 3: Agent Memory & Knowledge Discovery
-  # Branch: newspaper orphan ONLY (code exists but has never been on a proper branch)
-  # Files on newspaper branch:
-  #   packages/daemon/src/db/ (database.ts, migrator.ts, index.ts + tests)
-  #   packages/daemon/src/embedding/ (ollama-client.ts, index.ts + tests)
-  #   packages/daemon/src/librarian/ (ask-librarian, connections-writer, entity-extractor,
-  #     fts-index, vector-store, post-run-hook, index.ts + all tests)
-  #   packages/daemon/src/memory/ (depreciation.ts + test)
-  #   packages/daemon/src/__tests__/ (memory-e2e, patrol-integration)
-  #   packages/daemon/src/api/librarian.ts + test
-  #   data/migrations/001-004*.sql
-  #   config/discovery-modes.md
-  # Action needed: Cherry-pick/merge these files from newspaper branch,
-  #   then verify they work with current codebase (may need adaptation after SDK swap)
-  epic-3: in-progress
-  3-1-persistent-knowledge-hot-memory-depreciation: in-progress  # code exists on newspaper branch
-  3-2-sqlite-data-layer-per-agent-rag-vector-stores: in-progress  # code exists on newspaper branch
-  3-3-memory-librarian-shared-fts5-index: in-progress  # code exists on newspaper branch
-  3-4-cross-agent-knowledge-querying: in-progress  # code exists on newspaper branch
+  # Branch: consolidate/epic-4-complete (imported from newspaper orphan)
+  epic-3: done
+  3-1-persistent-knowledge-hot-memory-depreciation: done
+  3-2-sqlite-data-layer-per-agent-rag-vector-stores: done
+  3-3-memory-librarian-shared-fts5-index: done
+  3-4-cross-agent-knowledge-querying: done
   epic-3-retrospective: optional
 
   # Epic 4: The Morning Newspaper
-  # Branch: fix/swap-sdk-to-claude-code-js (committed)
-  # All 4 stories have code. Stories 4.1-4.3 are complete and passing.
-  # Story 4.4 is partially complete (core modules + tests exist, 4 API test failures).
-  epic-4: in-progress
+  # Branch: consolidate/epic-4-complete
+  epic-4: done
   4-1-newspaper-agent-persona-team-synthesis: done      # team-orchestrator.ts, newspaper-executor.ts
   4-2-typst-compilation-pipeline: done                   # typst-compiler.ts, pipeline.ts, markdown-to-typst.ts
   4-3-git-versioning-edition-management: done            # git-versioner.ts, edition-manager.ts
-  4-4-breaking-updates-featured-stories: in-progress     # breaking-update.ts, featured-story.ts (4 test failures)
+  4-4-breaking-updates-featured-stories: done            # breaking-update.ts, featured-story.ts, API routes
   epic-4-retrospective: optional
 
   # Epic 5: CLI — The Operator's Dashboard
