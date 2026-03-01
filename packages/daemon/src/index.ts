@@ -56,7 +56,7 @@ const sessionManager = initSessionManager(sdkAdapter);
 
 // Phase 2.5: Initialize database and embeddings
 const heraldDb = await initDatabase(config);
-const embedder = new OllamaEmbedder(config.ollama_url);
+const embedder = new OllamaEmbedder(config.ollama_url, config.ollama_model);
 if (await embedder.isAvailable()) {
   console.log('[herald] Ollama embeddings available');
 } else {

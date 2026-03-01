@@ -10,6 +10,7 @@ export const HeraldConfigSchema = z.object({
   newspaper_dir: z.string().default('./newspaper'),
   log_level: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
   ollama_url: z.string().default('http://localhost:11434'),
+  ollama_model: z.string().default('qwen3-embedding:8b'),
 });
 
 export type HeraldConfig = z.infer<typeof HeraldConfigSchema>;

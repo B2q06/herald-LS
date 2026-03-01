@@ -9,3 +9,4 @@ memory_dir: ./memory
 reports_dir: ./reports
 newspaper_dir: ./newspaper
 log_level: info
+ollama_model: qwen3-embedding:8b

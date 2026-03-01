@@ -94,13 +94,13 @@ describe('OllamaEmbedder', () => {
           json: () => Promise.resolve({ embeddings: [[0.1]] }),
         });
 
-      const embedder = new OllamaEmbedder('http://localhost:11434', 'mxbai-embed-large');
+      const embedder = new OllamaEmbedder('http://localhost:11434', 'qwen3-embedding:8b');
       await embedder.embed('hello world');
 
       const embedCall = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[1];
       expect(embedCall[0]).toBe('http://localhost:11434/api/embed');
       const body = JSON.parse(embedCall[1].body);
-      expect(body.model).toBe('mxbai-embed-large');
+      expect(body.model).toBe('qwen3-embedding:8b');
       expect(body.input).toBe('hello world');
     });
 

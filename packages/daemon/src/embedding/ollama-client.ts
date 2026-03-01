@@ -8,7 +8,7 @@ export class OllamaEmbedder {
   private available: boolean | null = null;
   private lastCheck: number | null = null;
 
-  constructor(baseUrl = 'http://localhost:11434', model = 'mxbai-embed-large') {
+  constructor(baseUrl = 'http://localhost:11434', model = 'qwen3-embedding:8b') {
     this.baseUrl = baseUrl.replace(/\/$/, '');
     this.model = model;
   }
